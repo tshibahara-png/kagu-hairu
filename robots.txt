@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kagu-hairu.netlify.app/sitemap.xml
