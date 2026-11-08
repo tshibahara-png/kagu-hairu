@@ -14,6 +14,7 @@
 <meta property="og:image" content="https://kagu-hairu.netlify.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
@@ -293,6 +294,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px}
     <div class="fh">運び込み（玄関・廊下・ドア）</div>
     <label>通り道のいちばん狭い幅 cm<input type="number" inputmode="decimal" data-f="passW"></label>
     <div class="fr" id="fitPass"></div>
+    <a href="/hannyu.html" style="display:inline-block;margin-top:8px;font-size:13px;color:var(--accent)">運び込みで測る場所をくわしく読む →</a>
   </div>
   <div class="fit">
     <div class="fh">カーテン</div>
@@ -425,7 +427,7 @@ function analyze(){
     const hid={};S.points.forEach(o=>{if(inter(r,pointBox(o)))hid[o.kind]=1});
     Object.keys(hid).forEach(k=>add(it,1,PKIND[k]+'が家具の裏に隠れます。使えるか確認を'));
     if(/テレビ/.test(it.name)){const tvs=S.points.filter(o=>o.kind==='tv');if(tvs.length){const d=Math.min(...tvs.map(o=>rectDist(r,...pointXY(o))));if(d>100)add(it,1,'テレビ端子から'+Math.round(d)+'cm離れています。アンテナ線の長さを確認')}}
-    if(+S.fit.passW>0&&Math.min(+it.w,+it.d)>+S.fit.passW-5)add(it,1,'そのままでは玄関や廊下を通りません。高さが'+fmt(+S.fit.passW-5)+'cm以下なら、立てて運べます');
+    if(+S.fit.passW>0&&Math.min(+it.w,+it.d)>+S.fit.passW-10)add(it,1,'そのままでは玄関や廊下を通りません。高さが'+fmt(+S.fit.passW-10)+'cm以下なら、立てて運べます');
     if(lv[it.id]===3)return;
     const b=bounds(it),sx=b.R-b.L-r.w,sy=b.B-b.T-r.h,m=+S.margin||0;
     if(sx>=-0.5&&sx<m)add(it,1,'横のすき間が'+fmt(Math.max(sx,0))+'cmしかありません。念のため測り直しを');
@@ -613,7 +615,7 @@ function renderFit(){
   if(v('panW')&&v('panD')){const s=pickStd(Math.min(v('panW'),v('panD')),[50,55,57,60,62,64,65,70]);if(s)b+=shopLinks('洗濯機 幅'+s+'cm','横'+fmt(v('panW'))+'×縦'+fmt(v('panD'))+'cm'+(v('faucet')?'・高さ'+fmt(v('faucet')-10)+'cm':'')+'まで')}
   $('#fitWasher').innerHTML=b;
   let c='';
-  if(v('passW')){const lim=v('passW')-5;c+='家具のいちばん薄い面が <b>'+fmt(lim)+'cm</b> まで<span class="n">持って運ぶ手のすき間に5cmを見ています。ベッドやソファは立てて運ぶことが多いです。</span>';
+  if(v('passW')){const lim=v('passW')-10;c+='家具のいちばん薄い面が <b>'+fmt(lim)+'cm</b> まで<span class="n">持つ手の分と、壁にぶつけないための余裕に10cmを見ています。ベッドやソファは立てて運ぶことが多いです。</span>';
     const ng=S.items.filter(o=>!o.flat&&Math.min(+o.w,+o.d)>lim);
     if(ng.length)c+='<span class="n" style="color:var(--warn);font-size:13px;margin-top:4px">そのままでは通らない家具：'+ng.map(o=>esc(o.name)).join('、')+'。高さが'+fmt(lim)+'cm以下なら、立てたり横にしたりして運べます。</span>';}
   $('#fitPass').innerHTML=c;
