@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>家具配置シミュレーター（試作版）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f4ef;--card:#ffffff;--ink:#33302b;--sub:#8a847a;--line:#ebe5db;
+  --accent:#3a8f7b;--accent-soft:#e6f2ee;--bad:#d9534a;--warn:#e0913a;--info:#c4a32b;
+  --r:16px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;overscroll-behavior:none}
+body{font-family:"Zen Maru Gothic",system-ui,-apple-system,"Hiragino Maru Gothic ProN",sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;background:#fff;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--sub)}
+
+.app{max-width:1100px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left))}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.top h1{font-size:22px;margin:0;letter-spacing:.03em}
+.top p{margin:0;font-size:13px;color:var(--sub)}
+.ghost{padding:8px 14px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);font-size:13px;white-space:nowrap}
+.ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+.result{border-radius:var(--r);padding:10px 16px;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;cursor:default}
+.result.ok{background:var(--accent-soft);color:#2a6b5c}
+.result.ng{background:#fdf0e3;color:#94591c;cursor:pointer}
+.result .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:0 0 24px;font-size:14px}
+.result.ok .ic{background:var(--accent)}
+.result.ng .ic{background:var(--warn)}
+.result .more{margin-left:auto;font-size:12px;opacity:.8}
+.issues{list-style:none;margin:-4px 0 10px;padding:10px 14px;background:var(--card);border-radius:var(--r);display:flex;flex-direction:column;gap:6px;font-size:14px}
+.issues li{display:flex;gap:8px;cursor:pointer}
+.issues .dot{flex:0 0 8px;height:8px;border-radius:50%;margin-top:8px}
+
+.stage{position:relative;flex:1;min-height:0;background:var(--card);border-radius:var(--r);box-shadow:0 1px 0 var(--line)}
+svg#plan{width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;display:block}
+.tip{position:absolute;left:14px;top:12px;font-size:12px;color:var(--sub);pointer-events:none}
+
+.selbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:6px 6px 6px 18px;display:flex;align-items:center;gap:6px;box-shadow:0 6px 20px rgba(0,0,0,.18);max-width:calc(100% - 24px);flex-wrap:wrap;justify-content:center}
+.selbar .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.selbar .sz{font-size:12px;opacity:.75;margin-right:6px;white-space:nowrap}
+.selbar button{padding:7px 12px;border-radius:999px;font-size:13px;background:rgba(255,255,255,.12)}
+.selbar button:hover{background:rgba(255,255,255,.22)}
+.selbar .shopbtn{padding:7px 12px;border-radius:999px;font-size:13px;background:#bf0000;color:#fff;text-decoration:none;font-weight:700;white-space:nowrap}
+.selbar .shopbtn .prtag{color:#fff;border-color:rgba(255,255,255,.5)}
+.selbar .edit{display:flex;gap:6px;align-items:center;width:100%;padding:4px 8px 4px 0}
+.selbar .edit input{background:rgba(255,255,255,.12);border:none;color:#fff;padding:6px 10px;font-size:14px;border-radius:10px}
+.selbar .edit span{font-size:12px;opacity:.7}
+
+.dock{display:flex;justify-content:center;gap:10px;padding:12px 0 calc(16px + env(safe-area-inset-bottom))}
+.dock button{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--card);border-radius:var(--r);padding:10px 22px;min-width:96px;font-size:13px;border:1.5px solid transparent}
+.dock button:hover{border-color:var(--accent)}
+.dock button svg{width:24px;height:24px;stroke:var(--accent)}
+.dock button.main{background:var(--accent);color:#fff}
+.dock button.main svg{stroke:#fff}
+
+.backdrop{position:fixed;inset:0;background:rgba(40,35,30,.25);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.backdrop.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:11;background:var(--card);border-radius:22px;box-shadow:0 10px 40px rgba(0,0,0,.18);padding:20px;overflow:auto;transition:transform .25s,opacity .2s;opacity:0;pointer-events:none;
+  right:20px;top:20px;bottom:20px;width:380px;transform:translateX(20px)}
+.sheet.on{opacity:1;pointer-events:auto;transform:none}
+.sheet h2{font-size:18px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:center}
+.sheet .lead{font-size:13px;color:var(--sub);margin:0 0 14px}
+.close{width:34px;height:34px;border-radius:50%;background:var(--bg);font-size:18px;line-height:1}
+.sec{margin:18px 0 8px;font-size:14px;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 16px;border-radius:999px;background:var(--bg);font-size:14px}
+.chip.on{background:var(--accent);color:#fff}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cardbtn{background:var(--bg);border-radius:14px;padding:10px 12px;text-align:left;border:1.5px solid transparent}
+.cardbtn:hover{border-color:var(--accent)}
+.cardbtn b{display:block;font-size:14px}
+.cardbtn small{color:var(--sub);font-size:12px}
+.btn{padding:11px 16px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;width:100%}
+.btn.sub{background:var(--bg);color:var(--ink);font-weight:500}
+.btn.del{background:none;color:var(--bad);font-weight:500}
+.op{background:var(--bg);border-radius:14px;padding:12px;margin-bottom:8px}
+.op .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:700;font-size:14px}
+.op .hd button{color:var(--sub);font-size:12px}
+.op .hd button:hover{color:var(--bad)}
+.seg{display:flex;background:#fff;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;padding:6px 0;border-radius:8px;font-size:13px;color:var(--sub)}
+.seg button.on{background:var(--accent);color:#fff}
+.row3{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.small{font-size:12px;color:var(--sub);margin:6px 0 0}
+details{margin-top:14px;background:var(--bg);border-radius:14px;padding:10px 14px}
+details summary{cursor:pointer;font-size:14px}
+details ol{padding-left:18px;margin:8px 0 2px;font-size:13px}
+.memo{display:grid;grid-template-columns:28px 1fr 28px;gap:6px;align-items:center;background:var(--bg);border-radius:12px;padding:8px;margin-bottom:6px}
+.memo .two{grid-column:2 / 3;display:grid;grid-template-columns:90px 1fr;gap:6px}
+.memo input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0 auto}
+.memo input{padding:7px 9px;font-size:15px}
+.memo .nt{font-size:14px}
+.memo.done .lb{color:var(--sub);text-decoration:line-through}
+.memo .x{color:var(--sub);font-size:16px}
+.memo .x:hover{color:var(--bad)}
+.fit{background:var(--bg);border-radius:14px;padding:12px;margin-bottom:8px}
+.fit .fh{font-weight:700;font-size:14px;margin-bottom:8px}
+.fit .fr{margin-top:8px;font-size:14px;line-height:1.7}
+.fit .fr:empty{display:none}
+.fit .fr b{color:var(--accent);font-size:16px}
+.fit .fr .n{display:block;font-size:12px;color:var(--sub)}
+.shops{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.shops a{flex:1;min-width:120px;text-align:center;text-decoration:none;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:9px 10px;font-size:13px;font-weight:700}
+.shops a:hover{border-color:var(--accent);color:var(--accent)}
+.prtag{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:var(--sub);border:1px solid var(--line);border-radius:4px;padding:0 4px;vertical-align:1px}
+.shops .pr{flex-basis:100%;font-size:11px;color:var(--sub)}
+.toast{position:fixed;left:50%;top:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.show{opacity:.94}
+
+@media (max-width:720px){
+  .app{padding:calc(10px + env(safe-area-inset-top)) 10px 0}
+  .dock{gap:6px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .top h1{font-size:19px}
+  .top p{display:none}
+  .selbar{border-radius:18px;padding:8px 8px 8px 14px;gap:5px;bottom:10px;width:calc(100% - 20px)}
+  .selbar button,.selbar .shopbtn{padding:7px 10px;font-size:12px}
+  .dock button{padding:8px 4px;min-width:0;flex:1;font-size:12px;white-space:nowrap}
+  .sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-height:78vh;max-height:78dvh;padding-bottom:calc(24px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;transform:translateY(30px)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <h1>この家具、入る？</h1>
+      <p>部屋を測って、家具を置いてみるだけ</p>
+    </div>
+    <button class="ghost" data-open="share">保存・共有</button>
+  </header>
+
+  <div id="result" class="result"></div>
+  <ul id="issues" class="issues" hidden></ul>
+
+  <div class="stage">
+    <svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="tip" id="tip">家具はドラッグで動かせます。2回タップで向きを変えられます。</div>
+    <div class="selbar" id="selbar" hidden>
+      <span class="nm" id="selName"></span>
+      <span class="sz" id="selSize"></span>
+      <button id="bRot">向きを変える</button>
+      <button id="bEdit">大きさ</button>
+      <button id="bDel">消す</button>
+      <a id="bShop" class="shopbtn" target="_blank" rel="noopener sponsored">楽天で探す<span class="prtag">PR</span></a>
+      <div class="edit" id="editRow" hidden>
+        <input id="sName" style="flex:2" aria-label="名前">
+        <input id="sW" type="number" inputmode="numeric" aria-label="幅"><span>×</span>
+        <input id="sD" type="number" inputmode="numeric" aria-label="奥行き"><span>cm</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="dock">
+    <button data-open="room"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h4M3.5 15h3M9 3.5v3"/></svg>部屋の広さ</button>
+    <button data-open="open"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V5a1 1 0 0 1 1-1h8v16"/><path d="M14 4l5 2v14h-5"/><circle cx="11.5" cy="12.5" r=".6"/><path d="M3 20h18"/></svg>ドア・窓など</button>
+    <button data-open="memo"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5v2h6v-2M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>採寸メモ</button>
+    <button data-open="furn" class="main"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M3 17v-4a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4z"/><path d="M5 17v2M19 17v2"/></svg>家具を置く</button>
+  </nav>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+
+<!-- 部屋 -->
+<section class="sheet" id="sheet-room">
+  <h2>部屋の広さ<button class="close" data-close>×</button></h2>
+  <p class="lead">まずは畳数を選ぶだけでも大丈夫。測ったら数字を入れてください。</p>
+  <div class="sec" style="margin-top:0">畳数で選ぶ</div>
+  <div class="chips" id="tatami"></div>
+  <div class="sec">柱がある角</div>
+  <div class="chips" id="cornerChips"></div>
+  <p class="small">押すと付けたり外したりできます（40cm角）。大きさは「ドア・窓など」で直せます。</p>
+  <div class="sec">測った数字（壁から壁まで）</div>
+  <div class="g2">
+    <label>横<input type="number" inputmode="numeric" id="roomW"></label>
+    <label>縦<input type="number" inputmode="numeric" id="roomD"></label>
+  </div>
+  <p class="small">単位はcmです。</p>
+  <details>
+    <summary>測り方のコツ</summary>
+    <ol>
+      <li>メジャーで、床に近い高さを壁から壁まで測ります。</li>
+      <li>心配なところは2回測って、小さい方の数字を使います。</li>
+      <li>家具は測らなくて大丈夫。通販ページの「幅・奥行き」を使います。</li>
+      <li>カーテンの測り方は「ドア・窓など」に、大きさの計算は「採寸メモ」にあります。</li>
+    </ol>
+  </details>
+  <details>
+    <summary>細かい設定</summary>
+    <label style="margin-top:8px">すき間がこれより狭いと「ぎりぎり」と知らせる（cm）<input type="number" id="margin" min="0"></label>
+  </details>
+</section>
+
+<!-- ドア・窓 -->
+<section class="sheet" id="sheet-open">
+  <h2>ドア・窓など<button class="close" data-close>×</button></h2>
+  <p class="lead">ドアの開く範囲や、床まである窓の前に家具を置くと知らせます。コンセントやテレビ端子が家具の裏に隠れるときも知らせます。</p>
+  <div id="openList"></div>
+  <div class="g2" style="margin-top:6px">
+    <button class="btn sub" id="addDoor">＋ ドア</button>
+    <button class="btn sub" id="addWin">＋ 窓</button>
+  </div>
+  <div class="sec">柱・壁の出っ張り</div>
+  <div id="pillarList"></div>
+  <button class="btn sub" id="addPillar" style="margin-top:6px">＋ 柱・出っ張り</button>
+  <p class="small">角の柱は「部屋の角」、壁の途中にある柱や出っ張りは「壁の途中」を選んでください。</p>
+  <div class="sec">コンセント・テレビ端子</div>
+  <div id="pointList"></div>
+  <div class="g2" style="margin-top:6px">
+    <button class="btn sub" id="addOutlet">＋ コンセント</button>
+    <button class="btn sub" id="addTv">＋ テレビ端子</button>
+  </div>
+  <p class="small">「端から」は、上下の壁なら左端から、左右の壁なら上端からの長さです。</p>
+  <details>
+    <summary>カーテンの測り方のコツ</summary>
+    <div class="sec" style="margin-top:10px">幅</div>
+    <ol>
+      <li>カーテンレールの両端にある、動かない輪（固定ランナー）から、反対側の固定ランナーまでを測ります。窓の幅ではなく、レールの長さです。</li>
+      <li>ゆとりを持たせるため、測った長さに1.05をかけます（例：200cmなら210cm）。</li>
+      <li>左右に分かれるカーテンなら、その半分が1枚の幅です（例：210cmなら105cmを2枚）。</li>
+    </ol>
+    <div class="sec">丈（たての長さ）</div>
+    <ol>
+      <li>レールの輪（ランナー）の穴の下から測ります。</li>
+      <li><b>腰の高さの窓</b>：窓枠の下から15〜20cm下まで。</li>
+      <li><b>床まである窓</b>：床から1〜2cm上まで（床に着くと汚れやすくなります）。</li>
+      <li>レースのカーテンは、厚いカーテンより1cmほど短くすると裾から見えません。</li>
+    </ol>
+    <p class="small">測った数字を「採寸メモ」のカーテンの欄に入れると、ちょうどいい大きさを計算します。</p>
+  </details>
+</section>
+
+<!-- 家具 -->
+<section class="sheet" id="sheet-furn">
+  <h2>家具を置く<button class="close" data-close>×</button></h2>
+  <p class="lead">選ぶと部屋の真ん中に置かれます。大きさはあとで変えられます。</p>
+  <div id="presetArea"></div>
+  <div class="sec">大きさを入れて置く</div>
+  <div class="stack">
+    <label>名前<input id="cName" placeholder="例：通販で見たソファ"></label>
+    <div class="g2" style="margin-top:8px">
+      <label>幅 cm<input type="number" inputmode="numeric" id="cW" value="120"></label>
+      <label>奥行き cm<input type="number" inputmode="numeric" id="cD" value="60"></label>
+    </div>
+    <label style="flex-direction:row;align-items:center;gap:8px;margin-top:10px;color:var(--ink);font-size:14px"><input type="checkbox" id="cFlat" style="width:auto">床に敷くもの（ラグやマット）</label>
+    <button class="btn" id="addCustom" style="margin-top:10px">置く</button>
+  </div>
+</section>
+
+<!-- 採寸メモ -->
+<section class="sheet" id="sheet-memo">
+  <h2>採寸メモ<button class="close" data-close>×</button></h2>
+  <p class="lead">測った数字をここに書いておけば、あとから見返して考えられます。測ったところに印を付けると、残りが分かります。</p>
+  <div id="memoCount" class="small" style="margin:0 0 8px"></div>
+  <div id="memoList"></div>
+  <button class="btn sub" id="addMemo" style="margin-top:6px">＋ 測るところを追加</button>
+  <div class="sec">入るサイズの目安</div>
+  <p class="small" style="margin-top:0">測った数字を入れると、どのくらいの大きさまで入るかが分かります。</p>
+  <div class="fit">
+    <div class="fh">冷蔵庫</div>
+    <div class="g2"><label>置き場の幅 cm<input type="number" inputmode="decimal" data-f="fridgeW"></label><label>置き場の高さ cm<input type="number" inputmode="decimal" data-f="fridgeH" placeholder="上の棚まで"></label></div>
+    <div class="fr" id="fitFridge"></div>
+  </div>
+  <div class="fit">
+    <div class="fh">洗濯機</div>
+    <div class="g2"><label>防水パンの横（外側）cm<input type="number" inputmode="decimal" data-f="panW"></label><label>防水パンの縦（外側）cm<input type="number" inputmode="decimal" data-f="panD"></label></div>
+    <label style="margin-top:8px">床から蛇口まで cm<input type="number" inputmode="decimal" data-f="faucet"></label>
+    <div class="fr" id="fitWasher"></div>
+  </div>
+  <div class="fit">
+    <div class="fh">運び込み（玄関・廊下・ドア）</div>
+    <label>通り道のいちばん狭い幅 cm<input type="number" inputmode="decimal" data-f="passW"></label>
+    <div class="fr" id="fitPass"></div>
+  </div>
+  <div class="fit">
+    <div class="fh">カーテン</div>
+    <div class="g2">
+      <label>窓の種類<select data-f="cType"><option value="floor">床まである窓</option><option value="koshi">腰の高さの窓</option></select></label>
+      <label>開き方<select data-f="cOpen"><option value="2">両開き（2枚）</option><option value="1">片開き（1枚）</option></select></label>
+    </div>
+    <label style="margin-top:8px">レールの長さ cm（端の動かない輪から輪まで）<input type="number" inputmode="decimal" data-f="railW"></label>
+    <label style="margin-top:8px" id="lblRailH">レールの輪の穴から床まで cm<input type="number" inputmode="decimal" data-f="railH"></label>
+    <div class="fr" id="fitCurtain"></div>
+  </div>
+  <p class="small">あくまで目安です。買う前に、商品ページの「設置に必要な寸法」も確認してください。</p>
+  <div class="sec">その他のメモ</div>
+  <textarea id="memoFree" rows="4" placeholder="例：エアコンの下は高さ180cmまで／玄関の段差あり"></textarea>
+  <p class="small">メモも自動で保存され、共有コードにも含まれます。</p>
+</section>
+
+<!-- 共有 -->
+<section class="sheet" id="sheet-share">
+  <h2>保存・共有<button class="close" data-close>×</button></h2>
+  <p class="lead">配置はこの端末に自動で保存されます。家族や不動産屋さんに渡すときは、共有コードを送ってください。</p>
+  <button class="btn" id="makeCode">共有コードをコピー</button>
+  <div class="sec">受け取ったコードを開く</div>
+  <textarea id="code" rows="3" placeholder="ここに貼り付け"></textarea>
+  <button class="btn sub" id="loadCode" style="margin-top:8px">開く</button>
+  <button class="btn del" id="reset" style="margin-top:16px">最初からやり直す</button>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+const KEY='kagu-haichi-v1';
+/* 紹介用の番号（アフィリエイトID）。空のときは普通の検索リンクになります */
+const AFF={rakuten:'59442172.3a89ccba.59442173.33295b20',amazon:''};
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const fmt=n=>Math.round(n*10)/10;
+const COLORS=['#e8d5b5','#c6ddd2','#d6cde6','#f0cdbd','#c9dcea','#e4dfb0','#e2cbd9'];
+const LV_COLOR=['#9a9285','#c4a32b','#e0913a','#d9534a'];
+const TATAMI=[['4.5畳',265,265],['6畳',355,265],['8畳',355,355],['10畳',440,355],['12畳',530,355]];
+const PRESETS=[
+ ['ベッド',[['シングル',97,195],['セミダブル',120,195],['ダブル',140,195]]],
+ ['ソファ・テーブル',[['2人掛けソファ',140,80],['3人掛けソファ',190,85],['ローテーブル',100,50],['こたつ',80,80],['食卓（2人）',75,75],['食卓（4人）',135,80]]],
+ ['収納・机',[['テレビ台',150,40],['本棚',80,30],['チェスト',80,45],['デスク',100,60]]],
+ ['家電',[['冷蔵庫',60,65],['洗濯機',60,60]]],
+ ['ラグ・マット（家具と重ねてOK）',[['ラグ（小）',130,190,1],['ラグ（中）',185,185,1],['ラグ（大）',200,250,1],['キッチンマット',60,180,1],['玄関マット',50,80,1],['こたつ敷き',190,190,1]]]
+];
+const WALLS=[['top','上'],['bottom','下'],['left','左'],['right','右']];
+const PKIND={outlet:'コンセント',tv:'テレビ端子',lan:'ネットの差込口'};
+function pointXY(o){const W=S.room.w,D=S.room.d,p=+o.pos;if(o.wall==='top')return [p,0];if(o.wall==='bottom')return [p,D];if(o.wall==='left')return [0,p];return [W,p]}
+function pointBox(o){const [x,y]=pointXY(o),s=4,dp=6;if(o.wall==='top')return {x:x-s,y:0,w:2*s,h:dp};if(o.wall==='bottom')return {x:x-s,y:y-dp,w:2*s,h:dp};if(o.wall==='left')return {x:0,y:y-s,w:dp,h:2*s};return {x:x-dp,y:y-s,w:dp,h:2*s}}
+function pillarRect(o){const W=S.room.w,D=S.room.d,p=+o.pos,a=+o.w,b=+o.d;if(o.place==='corner'){const c=o.corner||'tl';return {x:c[1]==='r'?W-a:0,y:c[0]==='b'?D-b:0,w:a,h:b}}if(o.wall==='top')return {x:p,y:0,w:a,h:b};if(o.wall==='bottom')return {x:p,y:D-b,w:a,h:b};if(o.wall==='left')return {x:0,y:p,w:b,h:a};return {x:W-b,y:p,w:b,h:a}}
+function rectDist(r,x,y){const dx=Math.max(r.x-x,0,x-(r.x+r.w)),dy=Math.max(r.y-y,0,y-(r.y+r.h));return Math.hypot(dx,dy)}
+const NORMAL={top:[0,1],bottom:[0,-1],left:[1,0],right:[-1,0]};
+
+const CORNERS=[['tl','左上'],['tr','右上'],['bl','左下'],['br','右下']];
+function cp(c){return {id:uid(),place:'corner',corner:c,wall:'top',pos:0,w:40,d:40}}
+function defaultNotes(){return ['部屋の横（壁から壁）','部屋の縦（壁から壁）','ドアの幅','天井の高さ','冷蔵庫の置き場の幅','洗濯機の置き場（防水パン）','エアコンの下から床まで','玄関ドアの幅','廊下のいちばん狭い幅'].map(l=>({id:uid(),label:l,val:'',note:'',done:false}))}
+function defaultState(){
+  return {
+    room:{w:355,d:265}, margin:3,
+    doors:[{id:uid(),wall:'bottom',pos:20,width:75,type:'swing',hinge:'start'}],
+    windows:[{id:uid(),wall:'top',pos:90,width:175,type:'hakidashi'}],
+    pillars:[],
+    notes:defaultNotes(),memo:'',fit:{},
+    points:[{id:uid(),kind:'outlet',wall:'left',pos:60},{id:uid(),kind:'tv',wall:'left',pos:180},{id:uid(),kind:'outlet',wall:'left',pos:195}],
+    items:[
+      {id:uid(),name:'シングル',w:97,d:195,x:258,y:70,rot:0,color:COLORS[0]},
+      {id:uid(),name:'ローテーブル',w:100,d:50,x:110,y:110,rot:0,color:COLORS[1]}
+    ]
+  };
+}
+function valid(s){if(!(s&&s.room&&+s.room.w>0&&+s.room.d>0&&Array.isArray(s.items)&&Array.isArray(s.doors)&&Array.isArray(s.windows)))return false;if(!Array.isArray(s.points))s.points=[];if(!Array.isArray(s.pillars))s.pillars=[];if(!Array.isArray(s.notes))s.notes=defaultNotes();{const drop=['カーテンレールの長さ','レールの輪から床まで','床から窓枠の下まで','窓の幅'];s.notes=s.notes.filter(o=>!(drop.includes(o.label)&&!String(o.val||'').trim()&&!String(o.note||'').trim()))}if(typeof s.memo!=='string')s.memo='';if(!s.fit||typeof s.fit!=='object')s.fit={};return true}
+function load(){try{const t=localStorage.getItem(KEY);const s=t?JSON.parse(t):null;return valid(s)?s:null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+let S=load()||defaultState();
+let sel=null,drag=null,lastTap={id:null,t:0},issuesOpen=false;
+const svg=$('#plan');
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2200)}
+
+/* ---------- 形の計算 ---------- */
+function dims(it){return (it.rot%180)?[+it.d,+it.w]:[+it.w,+it.d]}
+function rectOf(it){const [w,h]=dims(it);return {x:+it.x,y:+it.y,w,h}}
+function inter(a,b){const x1=Math.max(a.x,b.x),y1=Math.max(a.y,b.y),x2=Math.min(a.x+a.w,b.x+b.w),y2=Math.min(a.y+a.h,b.y+b.h);return (x2-x1>0.5&&y2-y1>0.5)?{x:x1,y:y1,w:x2-x1,h:y2-y1}:null}
+function wallLen(w){return (w==='top'||w==='bottom')?S.room.w:S.room.d}
+function opening(o){const W=S.room.w,D=S.room.d,p=+o.pos,w=+o.width;
+  if(o.wall==='top')return {A:[p,0],B:[p+w,0]};if(o.wall==='bottom')return {A:[p,D],B:[p+w,D]};
+  if(o.wall==='left')return {A:[0,p],B:[0,p+w]};return {A:[W,p],B:[W,p+w]}}
+function zoneBox(o,dp){const W=S.room.w,D=S.room.d,p=+o.pos,w=+o.width;
+  if(o.wall==='top')return {x:p,y:0,w:w,h:dp};if(o.wall==='bottom')return {x:p,y:D-dp,w:w,h:dp};
+  if(o.wall==='left')return {x:0,y:p,w:dp,h:w};return {x:W-dp,y:p,w:dp,h:w}}
+function doorZone(o){const sw=o.type==='swing';const box=zoneBox(o,sw?+o.width:60);let hinge=null;if(sw){const op=opening(o);hinge=o.hinge==='end'?op.B:op.A}return {box,hinge,r:+o.width}}
+function hitsDoor(r,o){const z=doorZone(o);const i=inter(r,z.box);if(!i)return false;if(!z.hinge)return true;
+  const cx=Math.max(i.x,Math.min(z.hinge[0],i.x+i.w)),cy=Math.max(i.y,Math.min(z.hinge[1],i.y+i.h));return Math.hypot(cx-z.hinge[0],cy-z.hinge[1])<z.r-0.5}
+function bounds(it){
+  const r=rectOf(it),W=S.room.w,D=S.room.d;
+  const b={L:0,R:W,T:0,B:D,Ln:'左の壁',Rn:'右の壁',Tn:'上の壁',Bn:'下の壁'};
+  const obs=it.flat?[]:S.items.filter(o=>o!==it&&!o.flat).map(o=>({q:rectOf(o),name:o.name})).concat(S.pillars.map(o=>({q:pillarRect(o),name:'柱'})));
+  for(const ob of obs){const q=ob.q,o=ob;
+    const yOv=Math.min(r.y+r.h,q.y+q.h)-Math.max(r.y,q.y)>0.5,xOv=Math.min(r.x+r.w,q.x+q.w)-Math.max(r.x,q.x)>0.5;
+    if(yOv){if(q.x+q.w<=r.x+0.5&&q.x+q.w>b.L){b.L=q.x+q.w;b.Ln=o.name}if(q.x>=r.x+r.w-0.5&&q.x<b.R){b.R=q.x;b.Rn=o.name}}
+    if(xOv){if(q.y+q.h<=r.y+0.5&&q.y+q.h>b.T){b.T=q.y+q.h;b.Tn=o.name}if(q.y>=r.y+r.h-0.5&&q.y<b.B){b.B=q.y;b.Bn=o.name}}}
+  return b;
+}
+function clampIn(it){const [w,h]=dims(it),W=S.room.w,D=S.room.d;it.x=w<=W?Math.min(Math.max(it.x,0),W-w):0;it.y=h<=D?Math.min(Math.max(it.y,0),D-h):0}
+function snapPos(it,nx,ny){
+  const [w,h]=dims(it),W=S.room.w,D=S.room.d,t=4,xs=[0,W],ys=[0,D];
+  for(const o of S.items){if(o===it)continue;const q=rectOf(o);xs.push(q.x,q.x+q.w);ys.push(q.y,q.y+q.h)}
+  for(const o of S.pillars){const q=pillarRect(o);xs.push(q.x,q.x+q.w);ys.push(q.y,q.y+q.h)}
+  let bx=nx,bd=t;for(const c of xs){if(Math.abs(nx-c)<bd){bd=Math.abs(nx-c);bx=c}if(Math.abs(nx+w-c)<bd){bd=Math.abs(nx+w-c);bx=c-w}}
+  let by=ny;bd=t;for(const c of ys){if(Math.abs(ny-c)<bd){bd=Math.abs(ny-c);by=c}if(Math.abs(ny+h-c)<bd){bd=Math.abs(ny+h-c);by=c-h}}
+  const tmp={...it,x:Math.round(bx),y:Math.round(by)};clampIn(tmp);return [tmp.x,tmp.y];
+}
+
+/* ---------- チェック ---------- */
+function analyze(){
+  const W=S.room.w,D=S.room.d,out=[],lv={};
+  const add=(it,l,m)=>{out.push({id:it.id,name:it.name,l,m});lv[it.id]=Math.max(lv[it.id]||0,l)};
+  S.items.forEach(it=>{const r=rectOf(it);
+    if(r.w>W+0.5||r.h>D+0.5)add(it,3,'部屋より大きくて入りません');
+    else if(r.x<-0.5||r.y<-0.5||r.x+r.w>W+0.5||r.y+r.h>D+0.5)add(it,3,'部屋からはみ出しています')});
+  for(let i=0;i<S.items.length;i++)for(let j=i+1;j<S.items.length;j++){const a=S.items[i],b=S.items[j];if(a.flat||b.flat)continue;
+    if(inter(rectOf(a),rectOf(b))){add(a,3,'「'+b.name+'」と重なっています');add(b,3,'「'+a.name+'」と重なっています')}}
+  S.items.forEach(it=>{const r=rectOf(it);if(S.pillars.some(o=>inter(r,pillarRect(o))))add(it,it.flat?2:3,it.flat?'柱にかかります（切り込みのある物か、置き場所の見直しを）':'柱と重なっています');if(it.flat)return;
+    S.doors.forEach((o,k)=>{if(hitsDoor(r,o))add(it,2,o.type==='swing'?'ドアを開けると当たります':'出入り口の前をふさいでいます')});
+    S.windows.forEach(o=>{if(o.type==='hakidashi'&&inter(r,zoneBox(o,30)))add(it,2,'床まである窓の前をふさいでいます')});
+    const hid={};S.points.forEach(o=>{if(inter(r,pointBox(o)))hid[o.kind]=1});
+    Object.keys(hid).forEach(k=>add(it,1,PKIND[k]+'が家具の裏に隠れます。使えるか確認を'));
+    if(/テレビ/.test(it.name)){const tvs=S.points.filter(o=>o.kind==='tv');if(tvs.length){const d=Math.min(...tvs.map(o=>rectDist(r,...pointXY(o))));if(d>100)add(it,1,'テレビ端子から'+Math.round(d)+'cm離れています。アンテナ線の長さを確認')}}
+    if(+S.fit.passW>0&&Math.min(+it.w,+it.d)>+S.fit.passW-5)add(it,1,'そのままでは玄関や廊下を通りません。高さが'+fmt(+S.fit.passW-5)+'cm以下なら、立てて運べます');
+    if(lv[it.id]===3)return;
+    const b=bounds(it),sx=b.R-b.L-r.w,sy=b.B-b.T-r.h,m=+S.margin||0;
+    if(sx>=-0.5&&sx<m)add(it,1,'横のすき間が'+fmt(Math.max(sx,0))+'cmしかありません。念のため測り直しを');
+    if(sy>=-0.5&&sy<m)add(it,1,'縦のすき間が'+fmt(Math.max(sy,0))+'cmしかありません。念のため測り直しを');
+  });
+  return {out,lv};
+}
+function openingWarnings(){const res=[];
+  S.doors.forEach((o,k)=>{if(+o.pos<0||+o.pos+ +o.width>wallLen(o.wall)+0.5)res.push('ドア'+(k+1)+'が壁からはみ出しています。位置か幅を見直してください')});
+  S.doors.forEach((o,k)=>{if(S.pillars.some(q=>inter(zoneBox(o,5),pillarRect(q))))res.push('ドア'+(k+1)+'が柱にかかっています。ドアの位置を見直してください')});
+  S.windows.forEach((o,k)=>{if(S.pillars.some(q=>inter(zoneBox(o,5),pillarRect(q))))res.push('窓'+(k+1)+'が柱にかかっています。窓の位置を見直してください')});
+  S.pillars.forEach((o,k)=>{if(o.place==='corner')return;if(+o.pos<0||+o.pos+ +o.w>wallLen(o.wall)+0.5)res.push('柱'+(k+1)+'が壁からはみ出しています。位置か幅を見直してください')});
+  S.windows.forEach((o,k)=>{if(+o.pos<0||+o.pos+ +o.width>wallLen(o.wall)+0.5)res.push('窓'+(k+1)+'が壁からはみ出しています。位置か幅を見直してください')});
+  return res}
+
+/* ---------- 図 ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function txt(x,y,s,f,col,wgt){return '<text x="'+x+'" y="'+y+'" font-size="'+f+'" fill="'+col+'" font-weight="'+wgt+'" text-anchor="middle" dominant-baseline="middle">'+s+'</text>'}
+function wallGap(o,wt){const W=S.room.w,D=S.room.d,p=+o.pos,w=+o.width;
+  if(o.wall==='top')return {x:p,y:-wt,w:w,h:wt};if(o.wall==='bottom')return {x:p,y:D,w:w,h:wt};
+  if(o.wall==='left')return {x:-wt,y:p,w:wt,h:w};return {x:W,y:p,w:wt,h:w}}
+function renderCanvas(){
+  const W=+S.room.w,D=+S.room.d,big=Math.max(W,D),M=big*0.1+16,fs=big/32,wt=Math.max(5,big/55);
+  svg.setAttribute('viewBox',(-M)+' '+(-M)+' '+(W+2*M)+' '+(D+2*M));
+  const {lv}=analyze();
+  const floor='#fcfaf6';
+  let h='<defs><pattern id="g50" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#efe9df" stroke-width="'+(big/600)+'"/></pattern></defs>';
+  h+='<rect x="'+(-wt)+'" y="'+(-wt)+'" width="'+(W+2*wt)+'" height="'+(D+2*wt)+'" fill="#7a7268" rx="'+(wt*0.6)+'"/>';
+  h+='<rect x="0" y="0" width="'+W+'" height="'+D+'" fill="'+floor+'"/><rect x="0" y="0" width="'+W+'" height="'+D+'" fill="url(#g50)"/>';
+  const dash=' stroke-dasharray="'+(fs*.35)+' '+(fs*.3)+'"';
+  S.windows.forEach(o=>{
+    const g=wallGap(o,wt);h+='<rect x="'+g.x+'" y="'+g.y+'" width="'+g.w+'" height="'+g.h+'" fill="#d3e7f2"/>';
+    const op=opening(o),n=NORMAL[o.wall];
+    h+='<line x1="'+(op.A[0]-n[0]*wt/2)+'" y1="'+(op.A[1]-n[1]*wt/2)+'" x2="'+(op.B[0]-n[0]*wt/2)+'" y2="'+(op.B[1]-n[1]*wt/2)+'" stroke="#86b3cc" stroke-width="'+(wt*0.18)+'"/>';
+    if(o.type==='hakidashi'){const z=zoneBox(o,30);h+='<rect x="'+z.x+'" y="'+z.y+'" width="'+z.w+'" height="'+z.h+'" fill="#86b3cc" fill-opacity=".12"/>'}
+  });
+  S.doors.forEach(o=>{
+    const g=wallGap(o,wt);h+='<rect x="'+g.x+'" y="'+g.y+'" width="'+g.w+'" height="'+g.h+'" fill="'+floor+'"/>';
+    const op=opening(o),n=NORMAL[o.wall],r=+o.width;
+    if(o.type==='swing'){
+      const H=o.hinge==='end'?op.B:op.A,J=o.hinge==='end'?op.A:op.B,P=[H[0]+n[0]*r,H[1]+n[1]*r];
+      const a=[P[0]-H[0],P[1]-H[1]],b=[J[0]-H[0],J[1]-H[1]],sw=(a[0]*b[1]-a[1]*b[0])>0?1:0;
+      h+='<path d="M'+H[0]+' '+H[1]+' L'+P[0]+' '+P[1]+' A'+r+' '+r+' 0 0 '+sw+' '+J[0]+' '+J[1]+' Z" fill="#e0913a" fill-opacity=".08"/>';
+      h+='<path d="M'+P[0]+' '+P[1]+' A'+r+' '+r+' 0 0 '+sw+' '+J[0]+' '+J[1]+'" fill="none" stroke="#e0b07a" stroke-width="'+(big/500)+'"'+dash+'/>';
+      h+='<line x1="'+H[0]+'" y1="'+H[1]+'" x2="'+P[0]+'" y2="'+P[1]+'" stroke="#a87a4a" stroke-width="'+(wt*0.35)+'" stroke-linecap="round"/>';
+    }else{
+      const z=zoneBox(o,60);h+='<rect x="'+z.x+'" y="'+z.y+'" width="'+z.w+'" height="'+z.h+'" fill="#e0913a" fill-opacity=".07"/>';
+      const t=[op.B[0]-op.A[0],op.B[1]-op.A[1]],L=Math.hypot(t[0],t[1])||1,u=[t[0]/L,t[1]/L],off=wt*0.22;
+      const s1=[op.A[0]-n[0]*(wt/2-off),op.A[1]-n[1]*(wt/2-off)],s2=[op.A[0]-n[0]*(wt/2+off),op.A[1]-n[1]*(wt/2+off)];
+      h+='<line x1="'+s1[0]+'" y1="'+s1[1]+'" x2="'+(s1[0]+u[0]*L*.55)+'" y2="'+(s1[1]+u[1]*L*.55)+'" stroke="#a87a4a" stroke-width="'+(wt*.25)+'"/>';
+      h+='<line x1="'+(s2[0]+u[0]*L*.45)+'" y1="'+(s2[1]+u[1]*L*.45)+'" x2="'+(s2[0]+u[0]*L)+'" y2="'+(s2[1]+u[1]*L)+'" stroke="#a87a4a" stroke-width="'+(wt*.25)+'"/>';
+    }
+  });
+  h+=txt(W/2,-wt-fs*1.3,fmt(W)+' cm',fs*.85,'#8a847a',500);
+  h+='<text x="'+(-wt-fs*1.3)+'" y="'+(D/2)+'" font-size="'+(fs*.85)+'" fill="#8a847a" font-weight="500" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 '+(-wt-fs*1.3)+' '+(D/2)+')">'+fmt(D)+' cm</text>';
+
+  S.items.filter(o=>o.flat).forEach(it=>{
+    const r=rectOf(it),l=lv[it.id]||0,isSel=it.id===sel;
+    const stroke=isSel?'#3a8f7b':(l>=2?LV_COLOR[l]:'#b9ad9c');
+    h+='<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" rx="'+(big/150)+'" fill="'+it.color+'" fill-opacity=".45" stroke="'+stroke+'" stroke-width="'+(isSel?big/160:big/450)+'"'+dash+'/>';
+    const f=Math.min(fs*.65,r.w/Math.max(3.5,it.name.length*1.1));
+    h+='<text x="'+(r.x+f*.5)+'" y="'+(r.y+f*.9)+'" font-size="'+f+'" fill="#8a7f70" font-weight="700">'+esc(it.name)+'</text>';
+  });
+  S.items.filter(o=>!o.flat).forEach(it=>{
+    const r=rectOf(it),l=lv[it.id]||0,isSel=it.id===sel,rx=Math.min(big/90,r.w/6,r.h/6);
+    const stroke=isSel?'#3a8f7b':(l>=2?LV_COLOR[l]:(l===1?LV_COLOR[1]:'rgba(0,0,0,.08)'));
+    const sw=isSel?big/160:(l>=1?big/240:big/600);
+    h+='<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" rx="'+rx+'" fill="'+it.color+'" stroke="'+stroke+'" stroke-width="'+sw+'"'+(l===1&&!isSel?dash:'')+'/>';
+    const f=Math.min(fs*.8,r.w/Math.max(3.5,it.name.length*1.05),r.h/2.8);
+    h+=txt(r.x+r.w/2,r.y+r.h/2-f*.5,esc(it.name),f,'#4a453e',700);
+    h+=txt(r.x+r.w/2,r.y+r.h/2+f*.75,fmt(it.w)+'×'+fmt(it.d),f*.78,'#7d766c',500);
+  });
+
+  S.pillars.forEach(o=>{const q=pillarRect(o);h+='<rect x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.h+'" fill="#7a7268"/>';if(q.w>fs*1.5&&q.h>fs*1.5)h+=txt(q.x+q.w/2,q.y+q.h/2,'柱',Math.min(fs*.6,q.w/2,q.h/2),'#fff',700)});
+  S.points.forEach(o=>{
+    const [x,y]=pointXY(o),n=NORMAL[o.wall],s=fs*.5,cx=x+n[0]*s*1.05,cy=y+n[1]*s*1.05;
+    if(o.kind==='outlet'){
+      h+='<rect x="'+(cx-s)+'" y="'+(cy-s)+'" width="'+(2*s)+'" height="'+(2*s)+'" rx="'+(s*.35)+'" fill="#fff" stroke="#6b645b" stroke-width="'+(big/550)+'"/>';
+      const vert=o.wall==='top'||o.wall==='bottom';
+      for(const k of [-1,1]){const ox=vert?k*s*.35:0,oy=vert?0:k*s*.35;
+        h+='<line x1="'+(cx+ox-(vert?0:s*.3))+'" y1="'+(cy+oy-(vert?s*.3:0))+'" x2="'+(cx+ox+(vert?0:s*.3))+'" y2="'+(cy+oy+(vert?s*.3:0))+'" stroke="#6b645b" stroke-width="'+(big/450)+'" stroke-linecap="round"/>'}
+    }else if(o.kind==='tv'){
+      h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+s+'" fill="#fff" stroke="#5a7fa3" stroke-width="'+(big/550)+'"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(s*.35)+'" fill="#5a7fa3"/>';
+    }else{
+      h+='<rect x="'+(cx-s)+'" y="'+(cy-s)+'" width="'+(2*s)+'" height="'+(2*s)+'" rx="'+(s*.35)+'" fill="#fff" stroke="#7a6aa3" stroke-width="'+(big/550)+'"/><rect x="'+(cx-s*.45)+'" y="'+(cy-s*.35)+'" width="'+(s*.9)+'" height="'+(s*.7)+'" fill="#7a6aa3"/>';
+    }
+  });
+
+  const it=S.items.find(o=>o.id===sel);
+  if(it){
+    const r=rectOf(it),b=bounds(it),cx=r.x+r.w/2,cy=r.y+r.h/2,c='#3a8f7b',w=big/500;
+    const seg=(x1,y1,x2,y2,val,tx,ty)=>{if(val<0.5)return;
+      h+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+dash+'/>';
+      h+='<text x="'+tx+'" y="'+ty+'" font-size="'+(fs*.72)+'" fill="'+c+'" font-weight="700" text-anchor="middle" dominant-baseline="middle" style="paint-order:stroke;stroke:'+floor+';stroke-width:'+(fs*.35)+'px">'+fmt(val)+'</text>'};
+    seg(b.L,cy,r.x,cy,r.x-b.L,(b.L+r.x)/2,cy);
+    seg(r.x+r.w,cy,b.R,cy,b.R-r.x-r.w,(r.x+r.w+b.R)/2,cy);
+    seg(cx,b.T,cx,r.y,r.y-b.T,cx,(b.T+r.y)/2);
+    seg(cx,r.y+r.h,cx,b.B,b.B-r.y-r.h,cx,(r.y+r.h+b.B)/2);
+  }
+  svg.innerHTML=h;
+}
+
+/* ---------- 結果 ---------- */
+function renderStatus(){
+  const {out}=analyze(),ow=openingWarnings(),n=out.length+ow.length,res=$('#result'),ul=$('#issues');
+  if(!n){res.className='result ok';res.innerHTML='<span class="ic">✓</span><span>いまの配置で、ぜんぶ問題なく置けます</span>';ul.hidden=true;return}
+  const hard=out.filter(o=>o.l>=2).length+ow.length;
+  res.className='result ng';
+  res.innerHTML='<span class="ic">!</span><span>'+(hard?'気になるところが '+n+' つあります':'確かめてほしいところが '+n+' つあります')+'</span><span class="more">'+(issuesOpen?'閉じる':'くわしく')+'</span>';
+  out.sort((a,b)=>b.l-a.l);
+  ul.innerHTML=ow.map(m=>'<li><span class="dot" style="background:'+LV_COLOR[2]+'"></span><span>'+esc(m)+'</span></li>').join('')+
+    out.map(o=>'<li data-id="'+o.id+'"><span class="dot" style="background:'+LV_COLOR[o.l]+'"></span><span><b>'+esc(o.name)+'</b>　'+esc(o.m)+'</span></li>').join('');
+  ul.hidden=!issuesOpen;
+}
+$('#result').addEventListener('click',()=>{if($('#result').classList.contains('ng')){issuesOpen=!issuesOpen;renderStatus()}});
+$('#issues').addEventListener('click',e=>{const li=e.target.closest('li[data-id]');if(li){sel=li.dataset.id;renderCanvas();renderSelected()}});
+
+/* ---------- 選んだ家具 ---------- */
+function curItem(){return S.items.find(o=>o.id===sel)}
+function setVal(q,v){const el=$(q);if(document.activeElement!==el)el.value=v}
+function renderSelected(){
+  const it=curItem(),bar=$('#selbar');bar.hidden=!it;
+  if(!it){$('#editRow').hidden=true;return}
+  $('#selName').textContent=it.name;$('#selSize').textContent=fmt(it.w)+'×'+fmt(it.d)+'cm';
+  setVal('#sName',it.name);setVal('#sW',it.w);setVal('#sD',it.d);
+  const sb=$('#bShop');sb.href=rakutenUrl(itemKw(it));sb.title='「'+itemKw(it)+'」で探します';sb.querySelector('.prtag').hidden=!AFF.rakuten;
+}
+$('#bRot').addEventListener('click',()=>{const it=curItem();if(it){rotate(it);refresh()}});
+$('#bEdit').addEventListener('click',()=>{const r=$('#editRow');r.hidden=!r.hidden;if(!r.hidden)$('#sW').focus()});
+$('#bDel').addEventListener('click',()=>{S.items=S.items.filter(o=>o.id!==sel);sel=null;refresh()});
+$('#sName').addEventListener('input',e=>{const it=curItem();if(!it)return;it.name=e.target.value||'家具';refresh()});
+['#sW','#sD'].forEach((q,i)=>$(q).addEventListener('input',e=>{const it=curItem(),v=+e.target.value;if(!it||!(v>0))return;if(i===0)it.w=v;else it.d=v;refresh()}));
+function rotate(it){const [w,h]=dims(it),cx=it.x+w/2,cy=it.y+h/2;it.rot=(it.rot+90)%180;const [nw,nh]=dims(it);it.x=Math.round(cx-nw/2);it.y=Math.round(cy-nh/2);clampIn(it)}
+function refresh(){save();renderCanvas();renderStatus();renderSelected()}
+
+/* ---------- シート ---------- */
+function openSheet(name){
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.toggle('on',s.id==='sheet-'+name));
+  $('#backdrop').classList.add('on');
+  if(name==='room')renderRoom();if(name==='open')renderOpenings();if(name==='memo'){renderMemo();renderFit()}
+}
+function renderMemo(){
+  const n=S.notes.length,d=S.notes.filter(o=>o.done).length;
+  $('#memoCount').textContent=n?('測ったところ '+d+' / '+n):'';
+  $('#memoList').innerHTML=S.notes.map(o=>'<div class="memo'+(o.done?' done':'')+'" data-id="'+o.id+'">'+
+    '<input type="checkbox" data-k="done"'+(o.done?' checked':'')+' aria-label="測った">'+
+    '<input class="lb" data-k="label" value="'+esc(o.label)+'" placeholder="測るところ">'+
+    '<button class="x" data-del aria-label="消す">×</button>'+
+    '<span></span><div class="two"><input data-k="val" inputmode="decimal" value="'+esc(o.val)+'" placeholder="cm"><input class="nt" data-k="note" value="'+esc(o.note)+'" placeholder="メモ"></div>'+
+    '</div>').join('')||'<p class="small">まだありません。</p>';
+  setVal('#memoFree',S.memo);
+}
+const ml=$('#memoList');
+ml.addEventListener('input',e=>{const row=e.target.closest('.memo'),k=e.target.dataset.k;if(!row||!k)return;const o=S.notes.find(x=>x.id===row.dataset.id);if(!o)return;
+  if(k==='done'){o.done=e.target.checked;save();renderMemo();return}
+  o[k]=e.target.value;if(k==='val'&&e.target.value.trim()&&!o.done){o.done=true;row.classList.add('done');row.querySelector('[data-k=done]').checked=true;const n=S.notes.length,d=S.notes.filter(x=>x.done).length;$('#memoCount').textContent='測ったところ '+d+' / '+n}
+  save()});
+ml.addEventListener('click',e=>{if(!e.target.hasAttribute('data-del'))return;const row=e.target.closest('.memo');S.notes=S.notes.filter(x=>x.id!==row.dataset.id);save();renderMemo()});
+$('#addMemo').addEventListener('click',()=>{S.notes.push({id:uid(),label:'',val:'',note:'',done:false});save();renderMemo();const ins=ml.querySelectorAll('.lb');ins[ins.length-1].focus()});
+$('#memoFree').addEventListener('input',e=>{S.memo=e.target.value;save()});
+function pickStd(lim,list){let b=0;for(const s of list)if(s<=lim)b=s;return b}
+const KW={'シングル':'シングルベッド','セミダブル':'セミダブルベッド','ダブル':'ダブルベッド','食卓（2人）':'ダイニングテーブル 2人用','食卓（4人）':'ダイニングテーブル 4人用','ラグ（小）':'ラグ','ラグ（中）':'ラグ','ラグ（大）':'ラグ','こたつ敷き':'こたつ敷き布団'};
+function rakutenUrl(kw){let rk='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(kw)+'/';if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return rk}
+function itemKw(it){return (KW[it.name]||it.name)+' 幅'+Math.round(+it.w)+'cm'}
+function shopLinks(kw,cond){
+  const q=encodeURIComponent(kw);
+  let rk='https://search.rakuten.co.jp/search/mall/'+q+'/';
+  if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);
+  let az='https://www.amazon.co.jp/s?k='+q+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):'');
+  const tag=(AFF.rakuten||AFF.amazon)?'<span class="prtag">PR</span>':'';
+  return '<div class="shops">'+(cond?'<span class="pr" style="color:var(--ink);font-size:13px">選ぶときは <b style="font-size:13px">'+cond+'</b> のものを</span>':'')+'<a href="'+rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a href="'+az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a>'+
+    '<span class="pr">検索の結果には大きさの合わない商品も混ざります。買う前に商品ページの寸法を確認してください。</span></div>';
+}
+function renderFit(){
+  const f=S.fit,v=k=>(+f[k]>0?+f[k]:0);
+  document.querySelectorAll('[data-f]').forEach(el=>{const k=el.dataset.f;if(el.tagName==='SELECT'){if(f[k])el.value=f[k]}else setVal('[data-f='+k+']',f[k]||'')});
+  let a='';
+  if(v('fridgeW'))a+='幅 <b>'+fmt(v('fridgeW')-2)+'cm</b> までの冷蔵庫<span class="n">左右に1cmずつ放熱のすき間を見ています。機種によってはもっと必要です。</span>';
+  if(v('fridgeH'))a+='高さ <b>'+fmt(v('fridgeH')-5)+'cm</b> まで<span class="n">上に5cmのすき間を見ています。</span>';
+  if(v('fridgeW')){const s=pickStd(v('fridgeW')-2,[45,48,50,54,55,60,65,68,70,75,80,85,90]);if(s)a+=shopLinks('冷蔵庫 幅'+s+'cm','幅'+fmt(v('fridgeW')-2)+'cm'+(v('fridgeH')?'・高さ'+fmt(v('fridgeH')-5)+'cm':'')+'まで')}
+  $('#fitFridge').innerHTML=a;
+  let b='';
+  if(v('panW')&&v('panD'))b+='本体が <b>横'+fmt(v('panW'))+'×縦'+fmt(v('panD'))+'cm</b> までなら安心<span class="n">脚が防水パンの内側に乗れば、本体が少し大きくても置ける機種もあります。</span>';
+  if(v('faucet'))b+='高さ <b>'+fmt(v('faucet')-10)+'cm</b> まで<span class="n">蛇口とホースをつなぐため、本体の上に10cmほど空けています。</span>';
+  if(v('panW')&&v('panD')){const s=pickStd(Math.min(v('panW'),v('panD')),[50,55,57,60,62,64,65,70]);if(s)b+=shopLinks('洗濯機 幅'+s+'cm','横'+fmt(v('panW'))+'×縦'+fmt(v('panD'))+'cm'+(v('faucet')?'・高さ'+fmt(v('faucet')-10)+'cm':'')+'まで')}
+  $('#fitWasher').innerHTML=b;
+  let c='';
+  if(v('passW')){const lim=v('passW')-5;c+='家具のいちばん薄い面が <b>'+fmt(lim)+'cm</b> まで<span class="n">持って運ぶ手のすき間に5cmを見ています。ベッドやソファは立てて運ぶことが多いです。</span>';
+    const ng=S.items.filter(o=>!o.flat&&Math.min(+o.w,+o.d)>lim);
+    if(ng.length)c+='<span class="n" style="color:var(--warn);font-size:13px;margin-top:4px">そのままでは通らない家具：'+ng.map(o=>esc(o.name)).join('、')+'。高さが'+fmt(lim)+'cm以下なら、立てたり横にしたりして運べます。</span>';}
+  $('#fitPass').innerHTML=c;
+  const floorT=(f.cType||'floor')==='floor',two=(f.cOpen||'2')==='2';
+  $('#lblRailH').firstChild.textContent=floorT?'レールの輪の穴から床まで cm':'レールの輪の穴から窓枠の下まで cm';
+  let d='';
+  if(v('railW')){const tw=v('railW')*1.05;d+='幅 <b>'+(two?Math.ceil(tw/2)+'cm を2枚':Math.ceil(tw)+'cm を1枚')+'</b><span class="n">レールの長さに5%のゆとりを足しています（'+fmt(v('railW'))+'cm × 1.05 ＝ '+Math.ceil(tw)+'cm）。お店の決まった幅から選ぶときは、これより少し大きいものを。</span>'}
+  if(v('railH')){
+    if(floorT){const a=v('railH')-1;d+='丈 <b>'+fmt(a)+'cm</b>（厚いカーテン）<span class="n">床から1cmほど浮かせています。床に着くと汚れやすく、開け閉めもしにくくなります。</span>レースは <b>'+fmt(a-1)+'cm</b><span class="n">厚いカーテンより1cm短くすると、裾からレースが見えません。</span>'}
+    else{const a=v('railH')+15;d+='丈 <b>'+fmt(a)+'〜'+fmt(a+5)+'cm</b>（厚いカーテン）<span class="n">窓枠の下から15〜20cm長くして、すき間風や光の漏れを防ぎます。下に家具を置くなら、家具に当たらない長さにしてください。</span>レースは <b>'+fmt(a-1)+'〜'+fmt(a+4)+'cm</b><span class="n">厚いカーテンより1cm短くします。</span>'}
+  }
+  if(v('railW')&&v('railH')){const tw=Math.ceil(v('railW')*1.05/((f.cOpen||'2')==='2'?2:1));const ln=(f.cType||'floor')==='floor'?Math.round(v('railH')-1):Math.round(v('railH')+15);d+=shopLinks('カーテン 幅'+tw+' 丈'+ln,'幅'+tw+'cm・丈'+ln+'cmに近い大きさ')}
+  $('#fitCurtain').innerHTML=d;
+}
+$('#sheet-memo').addEventListener('input',e=>{const k=e.target.dataset.f;if(!k)return;S.fit[k]=e.target.value;save();renderFit();renderStatus()});
+function closeSheets(){document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('on'));$('#backdrop').classList.remove('on')}
+document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openSheet(b.dataset.open)));
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeSheets));
+$('#backdrop').addEventListener('click',closeSheets);
+
+/* 部屋 */
+function renderRoom(){
+  $('#cornerChips').innerHTML=CORNERS.map(c=>'<button class="chip'+(S.pillars.some(o=>o.place==='corner'&&o.corner===c[0])?' on':'')+'" data-c="'+c[0]+'">'+c[1]+'</button>').join('');
+  setVal('#roomW',S.room.w);setVal('#roomD',S.room.d);setVal('#margin',S.margin);
+  $('#tatami').innerHTML=TATAMI.map(t=>'<button class="chip'+((+S.room.w===t[1]&&+S.room.d===t[2])?' on':'')+'" data-w="'+t[1]+'" data-d="'+t[2]+'">'+t[0]+'</button>').join('');
+}
+$('#tatami').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.room.w=+b.dataset.w;S.room.d=+b.dataset.d;S.items.forEach(clampIn);refresh();renderRoom()});
+$('#cornerChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=b.dataset.c,i=S.pillars.findIndex(o=>o.place==='corner'&&o.corner===c);
+  if(i>=0)S.pillars.splice(i,1);else S.pillars.push(cp(c));refresh();renderRoom()});
+$('#roomW').addEventListener('input',e=>{const v=+e.target.value;if(v>=50){S.room.w=v;refresh();renderRoom()}});
+$('#roomD').addEventListener('input',e=>{const v=+e.target.value;if(v>=50){S.room.d=v;refresh();renderRoom()}});
+$('#margin').addEventListener('input',e=>{const v=+e.target.value;if(v>=0){S.margin=v;refresh()}});
+
+/* ドア・窓 */
+function seg(k,opts,cur){return '<div class="seg" data-k="'+k+'">'+opts.map(o=>'<button data-v="'+o[0]+'" class="'+(o[0]===cur?'on':'')+'">'+o[1]+'</button>').join('')+'</div>'}
+function renderOpenings(){
+  let h='';
+  S.doors.forEach((o,k)=>{
+    const vert=o.wall==='left'||o.wall==='right';
+    h+='<div class="op" data-arr="doors" data-id="'+o.id+'"><div class="hd">ドア'+(k+1)+'<button data-del>消す</button></div>'+
+      seg('type',[['swing','開くドア'],['slide','引き戸']],o.type)+
+      '<div class="small" style="margin:8px 0 4px">どの壁？</div>'+seg('wall',WALLS,o.wall)+
+      '<div class="row3"><label>端から cm<input type="number" inputmode="numeric" data-k="pos" value="'+o.pos+'"></label><label>幅 cm<input type="number" inputmode="numeric" data-k="width" value="'+o.width+'"></label></div>'+
+      (o.type==='swing'?'<div class="small" style="margin:8px 0 4px">蝶番（ちょうつがい）はどっち？</div>'+seg('hinge',vert?[['start','上'],['end','下']]:[['start','左'],['end','右']],o.hinge==='end'?'end':'start'):'')+
+      '</div>';
+  });
+  S.windows.forEach((o,k)=>{
+    h+='<div class="op" data-arr="windows" data-id="'+o.id+'"><div class="hd">窓'+(k+1)+'<button data-del>消す</button></div>'+
+      seg('type',[['koshi','腰の高さの窓'],['hakidashi','床まである窓']],o.type==='hakidashi'?'hakidashi':'koshi')+
+      '<div class="small" style="margin:8px 0 4px">どの壁？</div>'+seg('wall',WALLS,o.wall)+
+      '<div class="row3"><label>端から cm<input type="number" inputmode="numeric" data-k="pos" value="'+o.pos+'"></label><label>幅 cm<input type="number" inputmode="numeric" data-k="width" value="'+o.width+'"></label></div>'+
+      '</div>';
+  });
+  $('#openList').innerHTML=h||'<p class="small">まだありません。下のボタンで追加してください。</p>';
+  let ph='';
+  S.points.forEach((o,k)=>{
+    const vert=o.wall==='left'||o.wall==='right';
+    ph+='<div class="op" data-arr="points" data-id="'+o.id+'"><div class="hd">'+PKIND[o.kind]+'<button data-del>消す</button></div>'+
+      seg('kind',[['outlet','コンセント'],['tv','テレビ端子'],['lan','ネット']],o.kind)+
+      '<div class="small" style="margin:8px 0 4px">どの壁？</div>'+seg('wall',WALLS,o.wall)+
+      '<div class="row3"><label>'+(vert?'上端から':'左端から')+' cm<input type="number" inputmode="numeric" data-k="pos" value="'+o.pos+'"></label><span></span></div></div>';
+  });
+  let qh='';
+  S.pillars.forEach((o,k)=>{
+    const vert=o.wall==='left'||o.wall==='right';
+    const cor=o.place==='corner';
+    qh+='<div class="op" data-arr="pillars" data-id="'+o.id+'"><div class="hd">柱'+(k+1)+'<button data-del>消す</button></div>'+
+      seg('place',[['corner','部屋の角'],['wall','壁の途中']],cor?'corner':'wall');
+    if(cor){
+      qh+='<div class="small" style="margin:8px 0 4px">どの角？</div>'+seg('corner',[['tl','左上'],['tr','右上'],['bl','左下'],['br','右下']],o.corner||'tl')+
+      '<div class="row3"><label>横の出っ張り cm<input type="number" inputmode="numeric" data-k="w" value="'+o.w+'"></label><label>縦の出っ張り cm<input type="number" inputmode="numeric" data-k="d" value="'+o.d+'"></label></div></div>';
+      return;
+    }
+    qh+='<div class="small" style="margin:8px 0 4px">どの壁？</div>'+seg('wall',WALLS,o.wall)+
+      '<div class="row3"><label>'+(vert?'上端から':'左端から')+' cm<input type="number" inputmode="numeric" data-k="pos" value="'+o.pos+'"></label><span></span>'+
+      '<label>壁に沿った幅 cm<input type="number" inputmode="numeric" data-k="w" value="'+o.w+'"></label><label>部屋側への出っ張り cm<input type="number" inputmode="numeric" data-k="d" value="'+o.d+'"></label></div></div>';
+  });
+  $('#pillarList').innerHTML=qh||'<p class="small">まだありません。</p>';
+  $('#pointList').innerHTML=ph||'<p class="small">まだありません。</p>';
+}
+const ol=$('#sheet-open');
+function findOp(el){const box=el.closest('.op');if(!box)return null;return S[box.dataset.arr].find(x=>x.id===box.dataset.id)}
+ol.addEventListener('click',e=>{
+  const box=e.target.closest('.op');if(!box)return;
+  if(e.target.hasAttribute('data-del')){S[box.dataset.arr]=S[box.dataset.arr].filter(x=>x.id!==box.dataset.id);refresh();renderOpenings();return}
+  const b=e.target.closest('.seg button');if(!b)return;const o=findOp(b);if(!o)return;
+  o[b.parentElement.dataset.k]=b.dataset.v;refresh();renderOpenings();
+});
+ol.addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;const o=findOp(e.target),v=+e.target.value;if(!o||isNaN(v))return;o[k]=v;refresh()});
+$('#addDoor').addEventListener('click',()=>{S.doors.push({id:uid(),wall:'bottom',pos:10,width:75,type:'swing',hinge:'start'});refresh();renderOpenings()});
+$('#addPillar').addEventListener('click',()=>{S.pillars.push({id:uid(),place:'corner',corner:'tl',wall:'top',pos:0,w:30,d:30});refresh();renderOpenings()});
+$('#addWin').addEventListener('click',()=>{S.windows.push({id:uid(),wall:'top',pos:30,width:120,type:'koshi'});refresh();renderOpenings()});
+$('#addOutlet').addEventListener('click',()=>{S.points.push({id:uid(),kind:'outlet',wall:'left',pos:30});refresh();renderOpenings()});
+$('#addTv').addEventListener('click',()=>{S.points.push({id:uid(),kind:'tv',wall:'left',pos:60});refresh();renderOpenings()});
+
+/* 家具 */
+$('#presetArea').innerHTML=PRESETS.map((g,gi)=>'<div class="sec">'+g[0]+'</div><div class="cards">'+g[1].map((p,pi)=>'<button class="cardbtn" data-g="'+gi+'" data-p="'+pi+'"><b>'+p[0]+'</b><small>'+p[1]+'×'+p[2]+'cm</small></button>').join('')+'</div>').join('');
+$('#presetArea').addEventListener('click',e=>{const b=e.target.closest('.cardbtn');if(!b)return;const p=PRESETS[+b.dataset.g][1][+b.dataset.p];addItem(p[0],p[1],p[2],!!p[3])});
+function addItem(name,w,d,flat){
+  const it={id:uid(),name,w:+w,d:+d,rot:0,flat:!!flat,color:COLORS[S.items.length%COLORS.length],x:Math.round(S.room.w/2-w/2),y:Math.round(S.room.d/2-d/2)};
+  clampIn(it);S.items.push(it);sel=it.id;refresh();closeSheets();toast('「'+name+'」を置きました。動かしてみてください');
+}
+$('#addCustom').addEventListener('click',()=>{const w=+$('#cW').value,d=+$('#cD').value;if(!(w>0&&d>0)){toast('幅と奥行きを数字で入れてください');return}addItem($('#cName').value.trim()||'家具',w,d,$('#cFlat').checked)});
+
+/* 共有 */
+$('#makeCode').addEventListener('click',async()=>{
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));$('#code').value=code;
+  try{await navigator.clipboard.writeText(code);toast('コピーしました。メールやLINEで送れます')}catch(e){const t=$('#code');t.focus();t.select();toast('コードを選びました。コピーして送ってください')}
+});
+$('#loadCode').addEventListener('click',()=>{
+  try{const s=JSON.parse(decodeURIComponent(escape(atob($('#code').value.trim()))));if(!valid(s))throw 0;S=s;sel=null;refresh();closeSheets();toast('開きました')}
+  catch(e){toast('開けませんでした。コードを全部貼り付けたか確認してください')}
+});
+const rb=$('#reset');
+rb.addEventListener('click',()=>{
+  if(rb.dataset.arm){S=defaultState();sel=null;refresh();rb.textContent='最初からやり直す';delete rb.dataset.arm;closeSheets();toast('最初の状態に戻しました');return}
+  rb.dataset.arm='1';rb.textContent='もう一度押すと消えます';
+  setTimeout(()=>{if(rb.dataset.arm){delete rb.dataset.arm;rb.textContent='最初からやり直す'}},3000);
+});
+
+/* ---------- 操作 ---------- */
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):{x:0,y:0}}
+function hit(p){const order=S.items.filter(o=>!o.flat).reverse().concat(S.items.filter(o=>o.flat).reverse());for(const it of order){const r=rectOf(it);if(p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)return it}return null}
+svg.addEventListener('pointerdown',e=>{
+  const p=pt(e),it=hit(p);
+  if(!it){if(sel){sel=null;renderCanvas();renderSelected()}return}
+  e.preventDefault();$('#tip').hidden=true;
+  const now=Date.now();
+  if(lastTap.id===it.id&&now-lastTap.t<320){rotate(it);sel=it.id;refresh();lastTap={id:null,t:0};return}
+  lastTap={id:it.id,t:now};
+  if(sel!==it.id)$('#editRow').hidden=true;
+  sel=it.id;drag={id:it.id,sx:p.x,sy:p.y,ox:it.x,oy:it.y,moved:false};
+  renderCanvas();renderSelected();
+});
+window.addEventListener('pointermove',e=>{
+  if(!drag)return;const it=S.items.find(o=>o.id===drag.id);if(!it)return;
+  const p=pt(e),[nx,ny]=snapPos(it,drag.ox+(p.x-drag.sx),drag.oy+(p.y-drag.sy));
+  if(nx!==it.x||ny!==it.y){it.x=nx;it.y=ny;drag.moved=true;renderCanvas();renderStatus()}
+});
+window.addEventListener('pointerup',()=>{if(drag){if(drag.moved){save();lastTap={id:null,t:0}}drag=null}});
+window.addEventListener('keydown',e=>{
+  const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
+  if(e.key==='Escape'){closeSheets();return}
+  const it=curItem();if(!it)return;
+  const s=e.shiftKey?10:1;let dx=0,dy=0;
+  if(e.key==='ArrowLeft')dx=-s;else if(e.key==='ArrowRight')dx=s;else if(e.key==='ArrowUp')dy=-s;else if(e.key==='ArrowDown')dy=s;
+  else if(e.key==='r'||e.key==='R'){rotate(it);refresh();return}
+  else if(e.key==='Delete'||e.key==='Backspace'){S.items=S.items.filter(o=>o!==it);sel=null;refresh();e.preventDefault();return}
+  else return;
+  e.preventDefault();it.x+=dx;it.y+=dy;clampIn(it);refresh();
+});
+refresh();
+})();
+</script>
+</body>
+</html>
