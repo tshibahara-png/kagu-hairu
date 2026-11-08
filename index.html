@@ -130,7 +130,8 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px}
 @media (max-width:720px){
   .app{padding:calc(10px + env(safe-area-inset-top)) 10px 0}
   .dock{gap:6px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
-  .top h1{font-size:19px}
+  .top h1{font-size:18px;white-space:nowrap}
+  .top .ghost{padding:7px 10px;font-size:12px}
   .top p{display:none}
   .selbar{border-radius:18px;padding:8px 8px 8px 14px;gap:5px;bottom:10px;width:calc(100% - 20px)}
   .selbar button,.selbar .shopbtn{padding:7px 10px;font-size:12px}
@@ -146,7 +147,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px}
       <h1>この家具、入る？</h1>
       <p>部屋を測って、家具を置いてみるだけ</p>
     </div>
-    <button class="ghost" data-open="share">保存・共有</button>
+    <div style="display:flex;gap:6px;flex-shrink:0"><a class="ghost" href="/guide/" style="text-decoration:none;color:inherit">測り方ガイド</a><button class="ghost" data-open="share">保存・共有</button></div>
   </header>
 
   <div id="result" class="result"></div>
@@ -286,6 +287,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px}
     <div class="g2"><label>防水パンの横（外側）cm<input type="number" inputmode="decimal" data-f="panW"></label><label>防水パンの縦（外側）cm<input type="number" inputmode="decimal" data-f="panD"></label></div>
     <label style="margin-top:8px">床から蛇口まで cm<input type="number" inputmode="decimal" data-f="faucet"></label>
     <div class="fr" id="fitWasher"></div>
+    <a href="/sentakuki.html" style="display:inline-block;margin-top:8px;font-size:13px;color:var(--accent)">洗濯機の置き場の測り方をくわしく読む →</a>
   </div>
   <div class="fit">
     <div class="fh">運び込み（玄関・廊下・ドア）</div>
@@ -301,6 +303,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px}
     <label style="margin-top:8px">レールの長さ cm（端の動かない輪から輪まで）<input type="number" inputmode="decimal" data-f="railW"></label>
     <label style="margin-top:8px" id="lblRailH">レールの輪の穴から床まで cm<input type="number" inputmode="decimal" data-f="railH"></label>
     <div class="fr" id="fitCurtain"></div>
+    <a href="/curtain.html" style="display:inline-block;margin-top:8px;font-size:13px;color:var(--accent)">カーテンのサイズの測り方をくわしく読む →</a>
   </div>
   <p class="small">あくまで目安です。買う前に、商品ページの「設置に必要な寸法」も確認してください。</p>
   <div class="sec">その他のメモ</div>
