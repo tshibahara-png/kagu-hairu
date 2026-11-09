@@ -57,18 +57,20 @@ a{color:inherit}
 .issues li{display:flex;gap:8px;cursor:pointer}
 .issues .dot{flex:0 0 7px;height:7px;border-radius:50%;margin-top:8px}
 
-.stage{position:relative;flex:1;min-height:0}
+.stage{position:relative;flex:1;min-height:0;padding-bottom:58px}
 svg#plan{width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;display:block;font-family:var(--gothic)}
-.tip{position:absolute;left:2px;top:0;font-size:11px;color:var(--sub);pointer-events:none;letter-spacing:.06em}
+.tip{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:11px;color:var(--sub);pointer-events:none;letter-spacing:.06em}
 
-.selbar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--card);color:var(--ink);border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 14px 34px -14px rgba(70,55,40,.32),0 0 0 1px rgba(70,55,40,.05);max-width:calc(100% - 8px);flex-wrap:wrap}
-.selbar .nm{font-family:var(--mincho);font-weight:800;font-size:18px;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-.selbar .sz{font-size:12px;color:var(--sub);margin-right:6px;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:.04em}
-.selbar button{padding:6px 12px;border-radius:999px;font-size:12px;letter-spacing:.06em;border:1px solid var(--line);background:var(--soft)}
-.selbar button:hover{border-color:var(--ink)}
-.selbar .shopbtn{margin-left:auto;padding:5px 0;font-size:12px;letter-spacing:.06em;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);white-space:nowrap}
-.selbar .shopbtn .prtag{border:none;padding:0;margin-left:4px;font-size:9px;color:var(--sub);letter-spacing:.1em}
-.selbar .edit{display:flex;gap:6px;align-items:center;width:100%;padding-top:4px}
+.selbar{position:absolute;left:0;right:0;bottom:4px;background:var(--card);color:var(--ink);border-radius:16px;padding:6px 6px 6px 16px;display:flex;align-items:center;gap:4px;box-shadow:0 10px 26px -14px rgba(70,55,40,.35),0 0 0 1px rgba(70,55,40,.06);flex-wrap:wrap;transition:opacity .15s}
+.selbar.fade{opacity:0;pointer-events:none}
+.selbar .nm{font-family:var(--mincho);font-weight:800;font-size:16px;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.selbar .sz{font-size:11px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums;margin-right:auto;padding-left:6px}
+.selbar .ib{display:flex;align-items:center;gap:4px;height:36px;padding:0 10px;border-radius:999px;font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
+.selbar .ib:hover{background:var(--paper)}
+.selbar .ib svg{width:18px;height:18px;stroke:var(--ink);flex:0 0 auto}
+.selbar .shopbtn{display:flex;align-items:center;height:36px;padding:0 10px;font-size:11.5px;letter-spacing:.04em;color:var(--ink);text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
+.selbar .shopbtn .prtag{border:none;padding:0;margin-left:3px;font-size:8.5px;color:var(--sub);letter-spacing:.08em;text-decoration:none}
+.selbar .edit{display:flex;gap:6px;align-items:center;width:100%;padding:6px 10px 4px 0}
 .selbar .edit input{padding:6px 10px;font-size:14px}
 .selbar .edit span{font-size:12px;color:var(--sub)}
 
@@ -150,8 +152,10 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   .brand svg{width:40px;height:24px}
   .links{gap:12px}
   .ghost{font-size:11px;letter-spacing:.08em}
-  .selbar{left:0;right:0;transform:none;max-width:none;bottom:8px;padding:11px 12px;gap:6px}
-  .selbar .nm{font-size:16px}
+  .selbar{padding-left:12px}
+  .selbar .nm{font-size:15px;max-width:96px}
+  .selbar .ib span{display:none}
+  .selbar .ib{padding:0 9px}
   .dock{margin-bottom:calc(10px + env(safe-area-inset-bottom))}
   .sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-height:80vh;max-height:80dvh;padding-bottom:calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;transform:translateY(30px)}
 }
@@ -174,10 +178,10 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
     <div class="selbar" id="selbar" hidden>
       <span class="nm" id="selName"></span>
       <span class="sz" id="selSize"></span>
-      <button id="bRot">向きを変える</button>
-      <button id="bEdit">大きさ</button>
-      <button id="bDel">消す</button>
-      <a id="bShop" class="shopbtn" target="_blank" rel="noopener sponsored">楽天で探す<span class="prtag">PR</span></a>
+      <button id="bRot" class="ib" title="向きを変える" aria-label="向きを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span>向き</span></button>
+      <button id="bEdit" class="ib" title="大きさを変える" aria-label="大きさを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1"/><path d="M6.5 8v3M10.5 8v4.5M14.5 8v3M18.5 8v4.5"/></svg><span>大きさ</span></button>
+      <button id="bDel" class="ib" title="消す" aria-label="消す"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg><span>消す</span></button>
+      <a id="bShop" class="shopbtn" target="_blank" rel="noopener sponsored">楽天<span class="prtag">PR</span></a>
       <div class="edit" id="editRow" hidden>
         <input id="sName" style="flex:2" aria-label="名前">
         <input id="sW" type="number" inputmode="numeric" aria-label="幅"><span>×</span>
@@ -589,7 +593,7 @@ $('#issues').addEventListener('click',e=>{const li=e.target.closest('li[data-id]
 function curItem(){return S.items.find(o=>o.id===sel)}
 function setVal(q,v){const el=$(q);if(document.activeElement!==el)el.value=v}
 function renderSelected(){
-  const it=curItem(),bar=$('#selbar');bar.hidden=!it;
+  const it=curItem(),bar=$('#selbar');bar.hidden=!it;$('#tip').hidden=!!it;
   if(!it){$('#editRow').hidden=true;return}
   $('#selName').textContent=it.name;$('#selSize').textContent=fmt(it.w)+'×'+fmt(it.d)+'cm';
   setVal('#sName',it.name);setVal('#sW',it.w);setVal('#sD',it.d);
@@ -782,7 +786,7 @@ function hit(p){const order=S.items.filter(o=>!o.flat).reverse().concat(S.items.
 svg.addEventListener('pointerdown',e=>{
   const p=pt(e),it=hit(p);
   if(!it){if(sel){sel=null;renderCanvas();renderSelected()}return}
-  e.preventDefault();$('#tip').hidden=true;
+  e.preventDefault();
   const now=Date.now();
   if(lastTap.id===it.id&&now-lastTap.t<320){rotate(it);sel=it.id;refresh();lastTap={id:null,t:0};return}
   lastTap={id:it.id,t:now};
@@ -793,9 +797,9 @@ svg.addEventListener('pointerdown',e=>{
 window.addEventListener('pointermove',e=>{
   if(!drag)return;const it=S.items.find(o=>o.id===drag.id);if(!it)return;
   const p=pt(e),[nx,ny]=snapPos(it,drag.ox+(p.x-drag.sx),drag.oy+(p.y-drag.sy));
-  if(nx!==it.x||ny!==it.y){it.x=nx;it.y=ny;drag.moved=true;renderCanvas();renderStatus()}
+  if(nx!==it.x||ny!==it.y){it.x=nx;it.y=ny;if(!drag.moved)$('#selbar').classList.add('fade');drag.moved=true;renderCanvas();renderStatus()}
 });
-window.addEventListener('pointerup',()=>{if(drag){if(drag.moved){save();lastTap={id:null,t:0}}drag=null}});
+window.addEventListener('pointerup',()=>{if(drag){if(drag.moved){save();lastTap={id:null,t:0}}drag=null;$('#selbar').classList.remove('fade');renderSelected()}});
 window.addEventListener('keydown',e=>{
   const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
   if(e.key==='Escape'){closeSheets();return}
