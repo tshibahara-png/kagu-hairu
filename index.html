@@ -75,6 +75,8 @@ svg#plan{width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-
 .selbar .ib{display:flex;align-items:center;justify-content:center;gap:4px;height:44px;min-width:44px;padding:0 10px;border-radius:999px;font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
 .selbar .ib:hover{background:var(--paper)}
 .selbar .ib svg{width:18px;height:18px;stroke:var(--ink);flex:0 0 auto}
+.selbar .find{display:flex;align-items:center;gap:5px;height:40px;padding:0 13px 0 10px;margin-left:4px;border-radius:999px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--ink);font-size:12px;font-weight:700;letter-spacing:.06em;white-space:nowrap}
+.selbar .find svg{width:17px;height:17px;stroke:var(--ink)}
 .selbar .shopbtn{display:flex;align-items:center;height:44px;padding:0 10px;font-size:11.5px;letter-spacing:.04em;color:var(--ink);text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
 .selbar .shopbtn .prtag{border:none;padding:0;margin-left:3px;font-size:8.5px;color:var(--sub);letter-spacing:.08em;text-decoration:none}
 .selbar .edit{display:flex;gap:6px;align-items:center;width:100%;padding:6px 10px 4px 0}
@@ -142,6 +144,25 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 .shops .pr{flex-basis:100%;font-size:11px;color:var(--sub)}
 .toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:999px;font-size:13px;letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;white-space:nowrap}
 .toast.show{opacity:.95}
+.fitcard{background:var(--card);border-radius:16px;padding:16px 16px 14px;box-shadow:0 0 0 1px var(--line)}
+.fitcard .who{font-family:var(--mincho);font-weight:800;font-size:19px;letter-spacing:.05em}
+.fitcard .who small{font-family:var(--gothic);font-weight:400;font-size:12px;color:var(--sub);margin-left:8px;letter-spacing:.04em}
+.fitcard .lbl{font-size:12px;color:var(--sub);letter-spacing:.1em;margin-top:12px}
+.fitcard .big{font-size:15px;margin-top:2px;letter-spacing:.04em}
+.fitcard .big b{font-size:28px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums;margin:0 2px}
+.fitcard .n{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.7}
+.choice{display:flex;flex-direction:column;gap:8px}
+.choice button{display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:0 0 0 1px var(--line)}
+.choice button i{flex:0 0 18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #bfb5a6}
+.choice button.on{box-shadow:0 0 0 1.5px var(--ink)}
+.choice button.on i{box-shadow:inset 0 0 0 5px var(--ink)}
+.choice b{display:block;font-size:14px;letter-spacing:.04em}
+.choice small{color:var(--sub);font-size:12px}
+.go2{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.go2 a{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:#fff;background:var(--ink);border-radius:14px;padding:14px;font-weight:700;letter-spacing:.08em;font-size:14px}
+.go2 a.sub{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line);font-weight:500}
+.go2 a .prtag{color:#cfc6b8;border-color:#5a524b}
+.go2 a.sub .prtag{color:var(--sub);border-color:var(--line)}
 .zoomreset{position:absolute;right:0;top:0;z-index:2;height:34px;padding:0 14px;border-radius:999px;background:var(--card);font-size:11.5px;letter-spacing:.08em;box-shadow:0 0 0 1px var(--line),0 6px 16px -10px rgba(70,55,40,.4)}
 .grab{display:none}
 
@@ -194,7 +215,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
       <button id="bRot" class="ib" title="向きを変える" aria-label="向きを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span>向き</span></button>
       <button id="bEdit" class="ib" title="大きさを変える" aria-label="大きさを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1"/><path d="M6.5 8v3M10.5 8v4.5M14.5 8v3M18.5 8v4.5"/></svg><span>大きさ</span></button>
       <button id="bDel" class="ib" title="消す" aria-label="消す"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg><span>消す</span></button>
-      <a id="bShop" class="shopbtn" target="_blank" rel="noopener sponsored">楽天<span class="prtag">PR</span></a>
+      <button id="bShop" class="find" aria-label="このサイズの商品を探す"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>商品を探す</button>
       <div class="edit" id="editRow" hidden>
         <input id="sName" style="flex:2" aria-label="名前">
         <input id="sW" type="number" inputmode="numeric" aria-label="幅"><span>×</span>
@@ -342,6 +363,13 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   <div class="sec">その他のメモ</div>
   <textarea id="memoFree" rows="4" placeholder="例：エアコンの下は高さ180cmまで／玄関の段差あり"></textarea>
   <p class="small">メモも自動で保存され、共有コードにも含まれます。</p>
+</section>
+
+<!-- 商品を探す -->
+<section class="sheet" id="sheet-shop"><i class="grab" aria-hidden="true"></i>
+  <h2>このサイズの商品を探す<button class="close" data-close>×</button></h2>
+  <p class="lead">置いた家具の大きさから、通販で商品を探せます。</p>
+  <div id="shopBody"></div>
 </section>
 
 <!-- 共有 -->
@@ -616,8 +644,8 @@ function renderSelected(){
   if(!it){$('#editRow').hidden=true;return}
   $('#selName').textContent=it.name;$('#selSize').textContent=fmt(it.w)+'×'+fmt(it.d)+'cm';
   setVal('#sName',it.name);setVal('#sW',it.w);setVal('#sD',it.d);
-  const sb=$('#bShop');sb.href=rakutenUrl(itemKw(it));sb.title='「'+itemKw(it)+'」で探します';sb.querySelector('.prtag').hidden=!AFF.rakuten;
 }
+$('#bShop').addEventListener('click',()=>{shopMode='now';renderShop();openSheet('shop')});
 $('#bRot').addEventListener('click',()=>{const it=curItem();if(it){rotate(it);refresh()}});
 $('#bEdit').addEventListener('click',()=>{const r=$('#editRow');r.hidden=!r.hidden;if(!r.hidden)$('#sW').focus()});
 $('#bDel').addEventListener('click',()=>{S.items=S.items.filter(o=>o.id!==sel);sel=null;refresh()});
@@ -655,13 +683,39 @@ function pickStd(lim,list){let b=0;for(const s of list)if(s<=lim)b=s;return b}
 const KW={'シングル':'シングルベッド','セミダブル':'セミダブルベッド','ダブル':'ダブルベッド','食卓（2人）':'ダイニングテーブル 2人用','食卓（4人）':'ダイニングテーブル 4人用','ラグ（小）':'ラグ','ラグ（中）':'ラグ','ラグ（大）':'ラグ','こたつ敷き':'こたつ敷き布団'};
 function rakutenUrl(kw){let rk='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(kw)+'/';if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return rk}
 function itemKw(it){return (KW[it.name]||it.name)+' 幅'+Math.round(+it.w)+'cm'}
+let shopMode='now';
+function shopUrls(kw){const q=encodeURIComponent(kw);let rk='https://search.rakuten.co.jp/search/mall/'+q+'/';if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return {rk,az:'https://www.amazon.co.jp/s?k='+q+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):'')}}
+function renderShop(){
+  const it=curItem(),box=$('#shopBody');if(!it){box.innerHTML='<p class="small">家具を選んでから開いてください。</p>';return}
+  const r=rectOf(it),b=bounds(it),rot=it.rot%180!==0;
+  const spW=Math.max(0,b.R-b.L),spD=Math.max(0,b.B-b.T);
+  const maxW=Math.floor(rot?spD:spW),maxD=Math.floor(rot?spW:spD);
+  const base=(KW[it.name]||it.name);
+  const {lv}=analyze(),bad=(lv[it.id]||0)>=3;
+  const open=!bad&&maxW>+it.w+60,dOpen=maxD>+it.d+60;
+  const canBig=!bad&&!open&&maxW>=+it.w+3;
+  if(shopMode==='max'&&!canBig)shopMode='now';
+  const wSearch=shopMode==='max'?maxW:Math.round(+it.w);
+  const kw=base+' 幅'+wSearch+'cm',u=shopUrls(kw),tag='<span class="prtag">PR</span>';
+  box.innerHTML='<div class="fitcard"><div class="who">'+esc(it.name)+'<small>今の大きさ '+fmt(it.w)+' × '+fmt(it.d)+' cm</small></div>'+
+    (bad?'<div class="n" style="color:var(--red);margin-top:10px">今の場所は、ほかの家具や壁と重なっています。置きたい場所に動かしてから開くと、入る大きさが分かります。</div></div>'
+     :open?'<div class="n" style="margin-top:10px">まわりが空いているので、入る大きさの上限は出していません。置き場の両側の壁や家具に寄せてから開くと、「この場所に入る大きさ」が分かります。</div></div>'
+     :'<div class="lbl">この場所に置けるのは</div><div class="big">幅<b>'+maxW+'</b>'+(dOpen?'cm まで':'× 奥行き<b>'+maxD+'</b>cm まで')+'</div>'+
+      '<div class="n">壁や、まわりの家具までのすき間から計算しています。ぎりぎりの大きさは避けて、数cmの余裕をとると安心です。</div></div>')+
+    '<div class="sec">どの大きさで探す？</div><div class="choice">'+
+    '<button data-m="now" class="'+(shopMode==='now'?'on':'')+'"><i></i><span><b>今の大きさに近いもの</b><small>「'+esc(base)+' 幅'+Math.round(+it.w)+'cm」で探します</small></span></button>'+
+    (canBig?'<button data-m="max" class="'+(shopMode==='max'?'on':'')+'"><i></i><span><b>この場所に入る、いちばん大きいもの</b><small>「'+esc(base)+' 幅'+maxW+'cm」で探します</small></span></button>':'')+
+    '</div><div class="go2"><a href="'+u.rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a class="sub" href="'+u.az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a></div>'+
+    '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>';
+}
+$('#shopBody').addEventListener('click',e=>{const b=e.target.closest('.choice button');if(!b)return;shopMode=b.dataset.m;renderShop()});
 function shopLinks(kw,cond){
   const q=encodeURIComponent(kw);
   let rk='https://search.rakuten.co.jp/search/mall/'+q+'/';
   if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);
   let az='https://www.amazon.co.jp/s?k='+q+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):'');
   const tag=(AFF.rakuten||AFF.amazon)?'<span class="prtag">PR</span>':'';
-  return '<div class="shops">'+(cond?'<span class="pr" style="color:var(--ink);font-size:13px">選ぶときは <b style="font-size:13px">'+cond+'</b> のものを</span>':'')+'<a href="'+rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a href="'+az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a>'+
+  return '<div class="shops"><span class="pr" style="color:var(--ink);font-size:13px;font-weight:700;letter-spacing:.06em">このサイズの商品を探す</span>'+(cond?'<span class="pr" style="color:var(--sub);font-size:12px;margin-top:-4px">選ぶときは '+cond+' のものを（「'+esc(kw)+'」で探します）</span>':'')+'<a href="'+rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a href="'+az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a>'+
     '<span class="pr">検索の結果には大きさの合わない商品も混ざります。買う前に商品ページの寸法を確認してください。</span></div>';
 }
 function renderFit(){
