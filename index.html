@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f3ea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="入る？">
+<link rel="manifest" href="/manifest.webmanifest">
 <title>この家具、入る？｜部屋を測って家具の置き場所を確かめる無料ツール</title>
 <meta name="description" content="メジャー1本で部屋を測って、家具を置いてみるだけ。ドアに当たる・はみ出す・ぎりぎりを自動で知らせます。冷蔵庫・洗濯機・カーテンの入るサイズもすぐ分かる無料ツールです。">
 <link rel="canonical" href="https://kagu-hairu.netlify.app/">
@@ -57,18 +63,19 @@ a{color:inherit}
 .issues li{display:flex;gap:8px;cursor:pointer}
 .issues .dot{flex:0 0 7px;height:7px;border-radius:50%;margin-top:8px}
 
-.stage{position:relative;flex:1;min-height:0;padding-bottom:58px}
+.stage{position:relative;flex:1;min-height:0;padding-bottom:64px}
 svg#plan{width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;display:block;font-family:var(--gothic)}
 .tip{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:11px;color:var(--sub);pointer-events:none;letter-spacing:.06em}
 
 .selbar{position:absolute;left:0;right:0;bottom:4px;background:var(--card);color:var(--ink);border-radius:16px;padding:6px 6px 6px 16px;display:flex;align-items:center;gap:4px;box-shadow:0 10px 26px -14px rgba(70,55,40,.35),0 0 0 1px rgba(70,55,40,.06);flex-wrap:wrap;transition:opacity .15s}
 .selbar.fade{opacity:0;pointer-events:none}
 .selbar .nm{font-family:var(--mincho);font-weight:800;font-size:16px;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
-.selbar .sz{font-size:11px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums;margin-right:auto;padding-left:6px}
-.selbar .ib{display:flex;align-items:center;gap:4px;height:36px;padding:0 10px;border-radius:999px;font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
+.nmwrap{display:flex;flex-direction:column;line-height:1.25;margin-right:auto;min-width:0;padding:2px 0}
+.selbar .sz{font-size:10.5px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums}
+.selbar .ib{display:flex;align-items:center;justify-content:center;gap:4px;height:44px;min-width:44px;padding:0 10px;border-radius:999px;font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
 .selbar .ib:hover{background:var(--paper)}
 .selbar .ib svg{width:18px;height:18px;stroke:var(--ink);flex:0 0 auto}
-.selbar .shopbtn{display:flex;align-items:center;height:36px;padding:0 10px;font-size:11.5px;letter-spacing:.04em;color:var(--ink);text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
+.selbar .shopbtn{display:flex;align-items:center;height:44px;padding:0 10px;font-size:11.5px;letter-spacing:.04em;color:var(--ink);text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
 .selbar .shopbtn .prtag{border:none;padding:0;margin-left:3px;font-size:8.5px;color:var(--sub);letter-spacing:.08em;text-decoration:none}
 .selbar .edit{display:flex;gap:6px;align-items:center;width:100%;padding:6px 10px 4px 0}
 .selbar .edit input{padding:6px 10px;font-size:14px}
@@ -135,6 +142,8 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 .shops .pr{flex-basis:100%;font-size:11px;color:var(--sub)}
 .toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:999px;font-size:13px;letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;white-space:nowrap}
 .toast.show{opacity:.95}
+.zoomreset{position:absolute;right:0;top:0;z-index:2;height:34px;padding:0 14px;border-radius:999px;background:var(--card);font-size:11.5px;letter-spacing:.08em;box-shadow:0 0 0 1px var(--line),0 6px 16px -10px rgba(70,55,40,.4)}
+.grab{display:none}
 
 @media (max-width:720px){
   .app{padding:calc(50px + env(safe-area-inset-top)) 14px 0}
@@ -153,11 +162,15 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   .links{gap:12px}
   .ghost{font-size:11px;letter-spacing:.08em}
   .selbar{padding-left:12px}
-  .selbar .nm{font-size:15px;max-width:96px}
+  .selbar .nm{font-size:15px;max-width:130px}
   .selbar .ib span{display:none}
   .selbar .ib{padding:0 9px}
   .dock{margin-bottom:calc(10px + env(safe-area-inset-bottom))}
-  .sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-height:80vh;max-height:80dvh;padding-bottom:calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;transform:translateY(30px)}
+  .sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-height:84vh;max-height:84dvh;padding-top:30px;padding-bottom:calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;transform:translateY(30px);overscroll-behavior:contain}
+  .sheet.on{transform:translateY(var(--dy,0px))}
+  .sheet.dragging{transition:none}
+  .grab{display:block;position:absolute;left:0;right:0;top:0;height:30px;touch-action:none;cursor:grab;z-index:1}
+  .grab:after{content:"";position:absolute;left:50%;top:10px;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:#d8cfc0}
 }
 </style>
 </head>
@@ -174,10 +187,10 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 
   <div class="stage">
     <svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="tip" id="tip">家具はドラッグで動かせます。2回タップで向きを変えられます。</div>
+    <button class="zoomreset" id="zoomReset" hidden>元の大きさ</button>
+    <div class="tip" id="tip">家具はドラッグで移動、2回タップで向きを変えられます。2本指で拡大できます。</div>
     <div class="selbar" id="selbar" hidden>
-      <span class="nm" id="selName"></span>
-      <span class="sz" id="selSize"></span>
+      <span class="nmwrap"><span class="nm" id="selName"></span><span class="sz" id="selSize"></span></span>
       <button id="bRot" class="ib" title="向きを変える" aria-label="向きを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span>向き</span></button>
       <button id="bEdit" class="ib" title="大きさを変える" aria-label="大きさを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1"/><path d="M6.5 8v3M10.5 8v4.5M14.5 8v3M18.5 8v4.5"/></svg><span>大きさ</span></button>
       <button id="bDel" class="ib" title="消す" aria-label="消す"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg><span>消す</span></button>
@@ -201,7 +214,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 <div class="backdrop" id="backdrop"></div>
 
 <!-- 部屋 -->
-<section class="sheet" id="sheet-room">
+<section class="sheet" id="sheet-room"><i class="grab" aria-hidden="true"></i>
   <h2>部屋の広さ<button class="close" data-close>×</button></h2>
   <p class="lead">まずは畳数を選ぶだけでも大丈夫。測ったら数字を入れてください。</p>
   <div class="sec" style="margin-top:0">畳数で選ぶ</div>
@@ -231,7 +244,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 </section>
 
 <!-- ドア・窓 -->
-<section class="sheet" id="sheet-open">
+<section class="sheet" id="sheet-open"><i class="grab" aria-hidden="true"></i>
   <h2>ドア・窓など<button class="close" data-close>×</button></h2>
   <p class="lead">ドアの開く範囲や、床まである窓の前に家具を置くと知らせます。コンセントやテレビ端子が家具の裏に隠れるときも知らせます。</p>
   <div id="openList"></div>
@@ -270,7 +283,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 </section>
 
 <!-- 家具 -->
-<section class="sheet" id="sheet-furn">
+<section class="sheet" id="sheet-furn"><i class="grab" aria-hidden="true"></i>
   <h2>家具を置く<button class="close" data-close>×</button></h2>
   <p class="lead">選ぶと部屋の真ん中に置かれます。大きさはあとで変えられます。</p>
   <div id="presetArea"></div>
@@ -287,7 +300,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 </section>
 
 <!-- 採寸メモ -->
-<section class="sheet" id="sheet-memo">
+<section class="sheet" id="sheet-memo"><i class="grab" aria-hidden="true"></i>
   <h2>採寸メモ<button class="close" data-close>×</button></h2>
   <p class="lead">測った数字をここに書いておけば、あとから見返して考えられます。測ったところに印を付けると、残りが分かります。</p>
   <div id="memoCount" class="small" style="margin:0 0 8px"></div>
@@ -332,7 +345,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 </section>
 
 <!-- 共有 -->
-<section class="sheet" id="sheet-share">
+<section class="sheet" id="sheet-share"><i class="grab" aria-hidden="true"></i>
   <h2>保存・共有<button class="close" data-close>×</button></h2>
   <p class="lead">配置はこの端末に自動で保存されます。家族や不動産屋さんに渡すときは、共有コードを送ってください。</p>
   <button class="btn" id="makeCode">共有コードをコピー</button>
@@ -394,6 +407,7 @@ function load(){try{const t=localStorage.getItem(KEY);const s=t?JSON.parse(t):nu
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 let S=load()||defaultState();
+let VIEW={z:1,cx:0,cy:0},BASE={x:0,y:0,w:1,h:1},PTRS=new Map(),pinch=null,pan=null,lastSnap=false;
 let sel=null,drag=null,lastTap={id:null,t:0},issuesOpen=false;
 const svg=$('#plan');
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2200)}
@@ -472,7 +486,12 @@ function wallGap(o,wt){const W=S.room.w,D=S.room.d,p=+o.pos,w=+o.width;
 function renderCanvas(){
   const W=+S.room.w,D=+S.room.d,big=Math.max(W,D),fs=big/30,wt=Math.max(6,big/42);
   const ML=wt+fs*0.6,MT=wt+fs*2.2,MB=wt+fs*2.6;
-  svg.setAttribute('viewBox',(-ML)+' '+(-MT)+' '+(W+2*ML)+' '+(D+MT+MB));
+  const bx=-ML,by=-MT,bw=W+2*ML,bh=D+MT+MB;BASE={x:bx,y:by,w:bw,h:bh};
+  if(VIEW.z<=1.001){VIEW.z=1;VIEW.cx=bx+bw/2;VIEW.cy=by+bh/2}
+  const vw=bw/VIEW.z,vh=bh/VIEW.z;
+  VIEW.cx=Math.min(Math.max(VIEW.cx,bx+vw/2),bx+bw-vw/2);VIEW.cy=Math.min(Math.max(VIEW.cy,by+vh/2),by+bh-vh/2);
+  svg.setAttribute('viewBox',(VIEW.cx-vw/2)+' '+(VIEW.cy-vh/2)+' '+vw+' '+vh);
+  $('#zoomReset').hidden=VIEW.z<=1.001;
   const {lv}=analyze();
   const hs=big/70;
   let h='<defs><pattern id="hatch" width="'+hs+'" height="'+hs+'" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="'+hs+'" height="'+hs+'" fill="'+PAPER+'"/><line x1="0" y1="0" x2="0" y2="'+hs+'" stroke="'+INK+'" stroke-width="'+(hs*.32)+'"/></pattern>'+
@@ -783,23 +802,70 @@ rb.addEventListener('click',()=>{
 /* ---------- 操作 ---------- */
 function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):{x:0,y:0}}
 function hit(p){const order=S.items.filter(o=>!o.flat).reverse().concat(S.items.filter(o=>o.flat).reverse());for(const it of order){const r=rectOf(it);if(p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)return it}return null}
+function pxPerUnit(){const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return Math.min(r.width/vb.width,r.height/vb.height)||1}
+function startPinch(){
+  const [a,b]=[...PTRS.values()];
+  pinch={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,z0:VIEW.z,m0:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},c0:{x:VIEW.cx,y:VIEW.cy},
+    anchor:pt({clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2})};
+  if(drag){const it=S.items.find(o=>o.id===drag.id);if(it&&drag.moved){it.x=drag.ox;it.y=drag.oy}drag=null;$('#selbar').classList.remove('fade')}
+  pan=null;
+}
 svg.addEventListener('pointerdown',e=>{
+  try{svg.setPointerCapture(e.pointerId)}catch(_){}
+  PTRS.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(PTRS.size===2){e.preventDefault();startPinch();renderCanvas();return}
+  if(PTRS.size>2)return;
   const p=pt(e),it=hit(p);
-  if(!it){if(sel){sel=null;renderCanvas();renderSelected()}return}
+  if(!it){
+    if(VIEW.z>1.001)pan={x:e.clientX,y:e.clientY,cx:VIEW.cx,cy:VIEW.cy,moved:false};
+    else if(sel){sel=null;renderCanvas();renderSelected()}
+    return;
+  }
   e.preventDefault();
   const now=Date.now();
   if(lastTap.id===it.id&&now-lastTap.t<320){rotate(it);sel=it.id;refresh();lastTap={id:null,t:0};return}
   lastTap={id:it.id,t:now};
   if(sel!==it.id)$('#editRow').hidden=true;
-  sel=it.id;drag={id:it.id,sx:p.x,sy:p.y,ox:it.x,oy:it.y,moved:false};
+  sel=it.id;drag={id:it.id,sx:p.x,sy:p.y,ox:it.x,oy:it.y,moved:false};lastSnap=false;
   renderCanvas();renderSelected();
 });
 window.addEventListener('pointermove',e=>{
+  if(PTRS.has(e.pointerId))PTRS.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&PTRS.size>=2){
+    const [a,b]=[...PTRS.values()],d=Math.hypot(a.x-b.x,a.y-b.y)||1;
+    const z=Math.min(Math.max(pinch.z0*d/pinch.d0,1),5);
+    VIEW.z=z;
+    VIEW.cx=pinch.anchor.x+(pinch.c0.x-pinch.anchor.x)*pinch.z0/z;
+    VIEW.cy=pinch.anchor.y+(pinch.c0.y-pinch.anchor.y)*pinch.z0/z;
+    renderCanvas();
+    const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2},s=pxPerUnit();
+    VIEW.cx-=(m.x-pinch.m0.x)/s;VIEW.cy-=(m.y-pinch.m0.y)/s;
+    renderCanvas();return;
+  }
+  if(pan){const s=pxPerUnit();VIEW.cx=pan.cx-(e.clientX-pan.x)/s;VIEW.cy=pan.cy-(e.clientY-pan.y)/s;if(Math.abs(e.clientX-pan.x)+Math.abs(e.clientY-pan.y)>4)pan.moved=true;renderCanvas();return}
   if(!drag)return;const it=S.items.find(o=>o.id===drag.id);if(!it)return;
-  const p=pt(e),[nx,ny]=snapPos(it,drag.ox+(p.x-drag.sx),drag.oy+(p.y-drag.sy));
+  const p=pt(e),rx=Math.round(drag.ox+(p.x-drag.sx)),ry=Math.round(drag.oy+(p.y-drag.sy)),[nx,ny]=snapPos(it,rx,ry);
+  const snapped=(nx!==rx||ny!==ry);
+  if(snapped&&!lastSnap){try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}}
+  lastSnap=snapped;
   if(nx!==it.x||ny!==it.y){it.x=nx;it.y=ny;if(!drag.moved)$('#selbar').classList.add('fade');drag.moved=true;renderCanvas();renderStatus()}
 });
-window.addEventListener('pointerup',()=>{if(drag){if(drag.moved){save();lastTap={id:null,t:0}}drag=null;$('#selbar').classList.remove('fade');renderSelected()}});
+function endPtr(e){
+  PTRS.delete(e.pointerId);
+  if(pinch){if(PTRS.size<2)pinch=null;return}
+  if(pan){if(!pan.moved&&sel){sel=null;renderCanvas();renderSelected()}pan=null}
+  if(drag){if(drag.moved){save();lastTap={id:null,t:0}}drag=null;$('#selbar').classList.remove('fade');renderSelected()}
+}
+window.addEventListener('pointerup',endPtr);
+window.addEventListener('pointercancel',endPtr);
+$('#zoomReset').addEventListener('click',()=>{VIEW.z=1;renderCanvas()});
+document.querySelectorAll('.sheet').forEach(sh=>{
+  let st=null;const g=sh.querySelector('.grab');if(!g)return;
+  g.addEventListener('pointerdown',e=>{st={y:e.clientY,id:e.pointerId};sh.classList.add('dragging');try{g.setPointerCapture(e.pointerId)}catch(_){}});
+  g.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dy=Math.max(0,e.clientY-st.y);sh.style.setProperty('--dy',dy+'px')});
+  const end=e=>{if(!st||e.pointerId!==st.id)return;const dy=Math.max(0,e.clientY-st.y);st=null;sh.classList.remove('dragging');sh.style.removeProperty('--dy');if(dy>80)closeSheets()};
+  g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+});
 window.addEventListener('keydown',e=>{
   const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
   if(e.key==='Escape'){closeSheets();return}
