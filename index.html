@@ -431,7 +431,7 @@ const NORMAL={top:[0,1],bottom:[0,-1],left:[1,0],right:[-1,0]};
 
 const CORNERS=[['tl','左上'],['tr','右上'],['bl','左下'],['br','右下']];
 function cp(c){return {id:uid(),place:'corner',corner:c,wall:'top',pos:0,w:40,d:40}}
-function defaultNotes(){return ['部屋の横（壁から壁）','部屋の縦（壁から壁）','ドアの幅','天井の高さ','冷蔵庫の置き場の幅','洗濯機の置き場（防水パン）','エアコンの下から床まで','玄関ドアの幅','廊下のいちばん狭い幅'].map(l=>({id:uid(),label:l,val:'',note:'',done:false}))}
+function defaultNotes(){return ['部屋の横（壁から壁）','部屋の縦（壁から壁）','ドアの幅','天井の高さ','コンセントとテレビ端子の位置（壁の端から）','冷蔵庫の置き場の幅','洗濯機の置き場（防水パン）','エアコンの下から床まで','玄関ドアの幅','廊下のいちばん狭い幅'].map(l=>({id:uid(),label:l,val:'',note:'',done:false}))}
 function defaultState(){
   return {
     room:{w:265,d:355}, margin:3,
@@ -503,8 +503,9 @@ function analyze(){
     S.doors.forEach((o,k)=>{if(hitsDoor(r,o))add(it,2,o.type==='swing'?'ドアを開けると当たります':'出入り口の前をふさいでいます')});
     S.windows.forEach(o=>{if(o.type==='hakidashi'&&inter(r,zoneBox(o,30)))add(it,2,'床まである窓の前をふさいでいます')});
     const hid={};S.points.forEach(o=>{if(inter(r,pointBox(o)))hid[o.kind]=1});
-    Object.keys(hid).forEach(k=>add(it,1,PKIND[k]+'が家具の裏に隠れます。使えるか確認を'));
+    Object.keys(hid).forEach(k=>{if(/テレビ台/.test(it.name)&&(k==='tv'||k==='outlet'))return;add(it,1,PKIND[k]+'が家具の裏に隠れます。使えるか確認を')});
     if(/テレビ/.test(it.name)){const tvs=S.points.filter(o=>o.kind==='tv');if(tvs.length){const d=Math.min(...tvs.map(o=>rectDist(r,...pointXY(o))));if(d>100)add(it,1,'テレビ端子から'+Math.round(d)+'cm離れています。アンテナ線の長さを確認')}}
+    if(/デスク|机|テレビ台|冷蔵庫|洗濯機|レンジ|ドレッサー|こたつ/.test(it.name)){const os=S.points.filter(o=>o.kind==='outlet');if(os.length){const d=Math.min(...os.map(o=>rectDist(r,...pointXY(o))));if(d>150)add(it,1,'いちばん近いコンセントまで約'+Math.round(d)+'cm。延長コードが要ります')}else add(it,1,'コンセントの位置が入っていません。「ドア・窓」で足すと、届くか確かめられます')}
     if(+S.fit.passW>0&&Math.min(+it.w,+it.d)>+S.fit.passW-10)add(it,1,'そのままでは玄関や廊下を通りません。高さが'+fmt(+S.fit.passW-10)+'cm以下なら、立てて運べます');
     if(lv[it.id]===3)return;
     const b=bounds(it),sx=b.R-b.L-r.w,sy=b.B-b.T-r.h,m=+S.margin||0;
@@ -728,7 +729,7 @@ function renderShop(){
     '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+''+(shopSort==='cheap'?'安い順は、部品や小物を外すため'+u.mn.toLocaleString()+'円以上で並べています。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>'+readLink(it.name);
 }
 function readLink(n){
-  const R=[[/ベッド|マットレス|シングル|ダブル/,'/bed.html','同じセミダブルでも別物？ 無印・ニトリ・IKEAを実寸で比べた'],[/ソファ/,'/sofa.html','一人暮らしのソファ、何cmまでなら置ける？'],[/冷蔵庫/,'/reizouko.html','冷蔵庫の置き場、どこを測る？'],[/洗濯機/,'/sentakuki.html','洗濯機の置き場、どこを測る？']];
+  const R=[[/ベッド|マットレス|シングル|ダブル/,'/bed.html','同じセミダブルでも別物？ 無印・ニトリ・IKEAを実寸で比べた'],[/ソファ/,'/sofa.html','一人暮らしのソファ、何cmまでなら置ける？'],[/テレビ台|デスク|机|ドレッサー|レンジ/,'/konsento.html','家具の置き場所は「コンセントとテレビ端子」で決まる'],[/冷蔵庫/,'/reizouko.html','冷蔵庫の置き場、どこを測る？'],[/洗濯機/,'/sentakuki.html','洗濯機の置き場、どこを測る？']];
   const r=R.find(x=>x[0].test(n||''))||[0,'/hannyu.html','部屋に入っても、玄関を通らない？ 運び込みの測り方'];
   return '<a class="readlink" href="'+r[1]+'"><small>買う前に読む</small>'+r[2]+' →</a>';
 }
