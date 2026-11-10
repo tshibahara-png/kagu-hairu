@@ -197,6 +197,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 .sortseg{display:flex;align-items:center;gap:4px;margin-top:16px;font-size:12px}.sortseg span{color:var(--sub);letter-spacing:.12em;margin-right:6px}.sortseg button{border:0;background:transparent;font:inherit;font-size:13px;padding:7px 14px;border-radius:999px;color:var(--sub);box-shadow:0 0 0 1px var(--line)}.sortseg button.on{background:var(--ink);color:#fff;box-shadow:none;font-weight:700}
 .welcome{margin:10px 0 4px;padding:16px 18px;border-radius:18px;background:var(--card);box-shadow:0 0 0 1px var(--line),0 8px 20px rgba(74,54,38,.06)}.welcome b{font-family:'Shippori Mincho B1',serif;font-size:17px}.welcome ol{margin:8px 0 12px;padding-left:1.3em;font-size:13.5px;line-height:1.9}.welcome .wbtn{display:flex;gap:8px}.welcome .wbtn .btn{flex:1;margin:0;font-size:13px;padding:12px 8px}
 .legend{position:absolute;left:0;right:0;bottom:40px;display:flex;justify-content:center;align-items:center;gap:8px;font-size:11px;color:var(--sub);pointer-events:none;white-space:nowrap}.legend em{font-style:normal}.legend span{display:inline-flex;align-items:center;gap:4px}.legend svg{width:15px;height:15px}
+.memo .lk{grid-column:2/3;font-size:10.5px;color:#8a6d10;background:#fdf3cf;border-radius:999px;padding:1px 8px;justify-self:start;align-self:center;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -338,7 +339,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 <!-- 採寸メモ -->
 <section class="sheet" id="sheet-memo"><i class="grab" aria-hidden="true"></i>
   <h2>採寸メモ<button class="close" data-close>×</button></h2>
-  <p class="lead">測った数字をここに書いておけば、あとから見返して考えられます。測ったところに印を付けると、残りが分かります。</p>
+  <p class="lead">内見しながら、測った数字を入れていくだけ。「図と計算に反映」と付いた項目は、入れたとたんに部屋の図や「入るサイズ」に反映されます。入力したら「次へ」で次の欄に進みます。</p>
   <div id="memoCount" class="small" style="margin:0 0 8px"></div>
   <div id="memoList"></div>
   <button class="btn sub" id="addMemo" style="margin-top:6px">＋ 測るところを追加</button>
@@ -677,22 +678,36 @@ function openSheet(name){
   $('#backdrop').classList.add('on');
   if(name==='room')renderRoom();if(name==='open')renderOpenings();if(name==='memo'){renderMemo();renderFit()}
 }
+const LINKS={'部屋の横（壁から壁）':'room.w','部屋の縦（壁から壁）':'room.d','ドアの幅':'door.width','冷蔵庫の置き場の幅':'fit.fridgeW','洗濯機の置き場（防水パン）':'fit.panW','廊下のいちばん狭い幅':'fit.passW'};
+function linkOf(o){return LINKS[o.label]||''}
+function getLinked(o){const l=linkOf(o);if(!l)return o.val;const [a,k]=l.split('.');
+  if(a==='room')return String(S.room[k]||'');if(a==='door')return S.doors[0]?String(S.doors[0].width||''):o.val;return S.fit[k]?String(S.fit[k]):''}
+function setLinked(o,v){const l=linkOf(o);if(!l)return false;const [a,k]=l.split('.'),n=+v;
+  if(a==='room'){if(n>=50&&n<=2000){S.room[k]=n;S.items.forEach(clampIn);return true}return false}
+  if(a==='door'){if(S.doors[0]&&n>=40&&n<=300){S.doors[0].width=n;return true}return false}
+  if(n>0){S.fit[k]=String(n)}else delete S.fit[k];return true}
 function renderMemo(){
+  S.notes.forEach(o=>{if(linkOf(o))o.val=getLinked(o)});
   const n=S.notes.length,d=S.notes.filter(o=>o.done).length;
   $('#memoCount').textContent=n?('測ったところ '+d+' / '+n):'';
   $('#memoList').innerHTML=S.notes.map(o=>'<div class="memo'+(o.done?' done':'')+'" data-id="'+o.id+'">'+
     '<input type="checkbox" data-k="done"'+(o.done?' checked':'')+' aria-label="測った">'+
     '<input class="lb" data-k="label" value="'+esc(o.label)+'" placeholder="測るところ">'+
     '<button class="x" data-del aria-label="消す">×</button>'+
-    '<span></span><div class="two"><input data-k="val" inputmode="decimal" value="'+esc(o.val)+'" placeholder="cm"><input class="nt" data-k="note" value="'+esc(o.note)+'" placeholder="メモ"></div>'+
+    '<span></span>'+(linkOf(o)?'<span class="lk">図と計算に反映</span><span></span><span></span>':'')+'<div class="two"><input data-k="val" inputmode="decimal" enterkeyhint="next" value="'+esc(o.val)+'" placeholder="cm"><input class="nt" data-k="note" value="'+esc(o.note)+'" placeholder="メモ"></div>'+
     '</div>').join('')||'<p class="small">まだありません。</p>';
   setVal('#memoFree',S.memo);
 }
 const ml=$('#memoList');
 ml.addEventListener('input',e=>{const row=e.target.closest('.memo'),k=e.target.dataset.k;if(!row||!k)return;const o=S.notes.find(x=>x.id===row.dataset.id);if(!o)return;
   if(k==='done'){o.done=e.target.checked;save();renderMemo();return}
-  o[k]=e.target.value;if(k==='val'&&e.target.value.trim()&&!o.done){o.done=true;row.classList.add('done');row.querySelector('[data-k=done]').checked=true;const n=S.notes.length,d=S.notes.filter(x=>x.done).length;$('#memoCount').textContent='測ったところ '+d+' / '+n}
+  o[k]=e.target.value;
+  if(k==='val'&&linkOf(o)){if(setLinked(o,e.target.value.trim())){save();renderCanvas();renderStatus();renderFit()}}
+  if(k==='label'){row.querySelector('.lk')&&!linkOf(o)&&row.querySelector('.lk').remove()}
+  if(k==='val'&&e.target.value.trim()&&!o.done){o.done=true;row.classList.add('done');row.querySelector('[data-k=done]').checked=true;const n=S.notes.length,d=S.notes.filter(x=>x.done).length;$('#memoCount').textContent='測ったところ '+d+' / '+n}
   save()});
+ml.addEventListener('focusin',e=>{if(e.target.dataset.k==='val')setTimeout(()=>e.target.select(),0)});
+ml.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.dataset.k!=='val')return;e.preventDefault();const all=[...ml.querySelectorAll('[data-k=val]')],i=all.indexOf(e.target);const nx=all[i+1];if(nx){nx.focus();nx.select();nx.scrollIntoView({block:'center',behavior:'smooth'})}else e.target.blur()});
 ml.addEventListener('click',e=>{if(!e.target.hasAttribute('data-del'))return;const row=e.target.closest('.memo');S.notes=S.notes.filter(x=>x.id!==row.dataset.id);save();renderMemo()});
 $('#addMemo').addEventListener('click',()=>{S.notes.push({id:uid(),label:'',val:'',note:'',done:false});save();renderMemo();const ins=ml.querySelectorAll('.lb');ins[ins.length-1].focus()});
 $('#memoFree').addEventListener('input',e=>{S.memo=e.target.value;save()});
@@ -977,6 +992,8 @@ refresh();renderTape();window.addEventListener('resize',renderTape);
   $('#wTry').addEventListener('click',()=>{done();toast('見本の部屋です。家具をドラッグしてみてください')});
 })();
 })();
+
+if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}))}
 </script>
 </body>
 </html>
