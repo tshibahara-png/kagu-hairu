@@ -196,6 +196,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 .readlink{display:block;margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--soft,#fffdf8);box-shadow:0 0 0 1px var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;line-height:1.6}.readlink small{display:block;font-weight:500;font-size:11px;letter-spacing:.14em;color:var(--sub)}
 .sortseg{display:flex;align-items:center;gap:4px;margin-top:16px;font-size:12px}.sortseg span{color:var(--sub);letter-spacing:.12em;margin-right:6px}.sortseg button{border:0;background:transparent;font:inherit;font-size:13px;padding:7px 14px;border-radius:999px;color:var(--sub);box-shadow:0 0 0 1px var(--line)}.sortseg button.on{background:var(--ink);color:#fff;box-shadow:none;font-weight:700}
 .welcome{margin:10px 0 4px;padding:16px 18px;border-radius:18px;background:var(--card);box-shadow:0 0 0 1px var(--line),0 8px 20px rgba(74,54,38,.06)}.welcome b{font-family:'Shippori Mincho B1',serif;font-size:17px}.welcome ol{margin:8px 0 12px;padding-left:1.3em;font-size:13.5px;line-height:1.9}.welcome .wbtn{display:flex;gap:8px}.welcome .wbtn .btn{flex:1;margin:0;font-size:13px;padding:12px 8px}
+.legend{position:absolute;left:0;right:0;bottom:40px;display:flex;justify-content:center;align-items:center;gap:8px;font-size:11px;color:var(--sub);pointer-events:none;white-space:nowrap}.legend em{font-style:normal}.legend span{display:inline-flex;align-items:center;gap:4px}.legend svg{width:15px;height:15px}
 </style>
 </head>
 <body>
@@ -217,7 +218,13 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   <div class="stage">
     <svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg>
     <button class="zoomreset" id="zoomReset" hidden>元の大きさ</button>
-    <div class="tip" id="tip">家具はドラッグで移動、2回タップで向きを変えられます。2本指で拡大できます。</div>
+    <div class="legend" id="legend">
+      <span><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="4" fill="#fff" stroke="#2b2622" stroke-width="1.6"/><path d="M8 7.5v5M12 7.5v5" stroke="#2b2622" stroke-width="1.8" stroke-linecap="round"/></svg>コンセント</span>
+      <span><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="#fff" stroke="#2b2622" stroke-width="1.6"/><circle cx="10" cy="10" r="2.3" fill="#2b2622"/></svg>テレビ端子</span>
+      <span><svg viewBox="0 0 20 20"><rect x="2" y="7" width="16" height="6" fill="#fff" stroke="#2b2622" stroke-width="1.4"/><path d="M2 10h16" stroke="#2b2622" stroke-width="1"/></svg>窓</span>
+      <em>は、家具でふさぐと知らせます</em>
+    </div>
+    <div class="tip" id="tip">ドラッグで移動・2回タップで向き・2本指で拡大</div>
     <div class="selbar" id="selbar" hidden>
       <span class="nmwrap"><span class="nm" id="selName"></span><span class="sz" id="selSize"></span></span>
       <button id="bRot" class="ib" title="向きを変える" aria-label="向きを変える"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span>向き</span></button>
@@ -649,7 +656,7 @@ $('#issues').addEventListener('click',e=>{const li=e.target.closest('li[data-id]
 function curItem(){return S.items.find(o=>o.id===sel)}
 function setVal(q,v){const el=$(q);if(document.activeElement!==el)el.value=v}
 function renderSelected(){
-  const it=curItem(),bar=$('#selbar');bar.hidden=!it;$('#tip').hidden=!!it;
+  const it=curItem(),bar=$('#selbar');bar.hidden=!it;$('#tip').hidden=!!it;$('#legend').hidden=!!it;
   if(!it){$('#editRow').hidden=true;return}
   $('#selName').textContent=it.name;$('#selSize').textContent=fmt(it.w)+'×'+fmt(it.d)+'cm';
   setVal('#sName',it.name);setVal('#sW',it.w);setVal('#sD',it.d);
