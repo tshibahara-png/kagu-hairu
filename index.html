@@ -194,6 +194,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   .grab:after{content:"";position:absolute;left:50%;top:10px;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:#d8cfc0}
 }
 .readlink{display:block;margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--soft,#fffdf8);box-shadow:0 0 0 1px var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;line-height:1.6}.readlink small{display:block;font-weight:500;font-size:11px;letter-spacing:.14em;color:var(--sub)}
+.sortseg{display:flex;align-items:center;gap:4px;margin-top:16px;font-size:12px}.sortseg span{color:var(--sub);letter-spacing:.12em;margin-right:6px}.sortseg button{border:0;background:transparent;font:inherit;font-size:13px;padding:7px 14px;border-radius:999px;color:var(--sub);box-shadow:0 0 0 1px var(--line)}.sortseg button.on{background:var(--ink);color:#fff;box-shadow:none;font-weight:700}
 </style>
 </head>
 <body>
@@ -685,7 +686,10 @@ const KW={'シングル':'シングルベッド','セミダブル':'セミダブ
 function rakutenUrl(kw){let rk='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(kw)+'/';if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return rk}
 function itemKw(it){return (KW[it.name]||it.name)+' 幅'+Math.round(+it.w)+'cm'}
 let shopMode='now';
-function shopUrls(kw){const q=encodeURIComponent(kw);let rk='https://search.rakuten.co.jp/search/mall/'+q+'/';if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return {rk,az:'https://www.amazon.co.jp/s?k='+q+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):'')}}
+let shopSort='rec';
+const FLOOR=[[/ベッド|マットレス/,8000],[/ソファ/,8000],[/冷蔵庫|洗濯機/,15000],[/テレビ台|デスク|机|テーブル|ダイニング/,3000]];
+function floorOf(kw){const f=FLOOR.find(x=>x[0].test(kw));return f?f[1]:2000}
+function shopUrls(kw,sort){const q=encodeURIComponent(kw),cheap=sort==='cheap',mn=floorOf(kw);let rk='https://search.rakuten.co.jp/search/mall/'+q+'/'+(cheap?'?s=2&min='+mn:'');if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return {rk,az:'https://www.amazon.co.jp/s?k='+q+(cheap?'&s=price-asc-rank&rh=p_36%3A'+(mn*100)+'-':'')+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):''),mn}}
 function renderShop(){
   const it=curItem(),box=$('#shopBody');if(!it){box.innerHTML='<p class="small">家具を選んでから開いてください。</p>';return}
   const r=rectOf(it),b=bounds(it),rot=it.rot%180!==0;
@@ -697,7 +701,7 @@ function renderShop(){
   const canBig=!bad&&!open&&maxW>=+it.w+3;
   if(shopMode==='max'&&!canBig)shopMode='now';
   const wSearch=shopMode==='max'?maxW:Math.round(+it.w);
-  const kw=base+' 幅'+wSearch+'cm',u=shopUrls(kw),tag='<span class="prtag">PR</span>';
+  const kw=base+' 幅'+wSearch+'cm',u=shopUrls(kw,shopSort),tag='<span class="prtag">PR</span>';
   box.innerHTML='<div class="fitcard"><div class="who">'+esc(it.name)+'<small>今の大きさ '+fmt(it.w)+' × '+fmt(it.d)+' cm</small></div>'+
     (bad?'<div class="n" style="color:var(--red);margin-top:10px">今の場所は、ほかの家具や壁と重なっています。置きたい場所に動かしてから開くと、入る大きさが分かります。</div></div>'
      :open?'<div class="n" style="margin-top:10px">まわりが空いているので、入る大きさの上限は出していません。置き場の両側の壁や家具に寄せてから開くと、「この場所に入る大きさ」が分かります。</div></div>'
@@ -706,15 +710,15 @@ function renderShop(){
     '<div class="sec">どの大きさで探す？</div><div class="choice">'+
     '<button data-m="now" class="'+(shopMode==='now'?'on':'')+'"><i></i><span><b>今の大きさに近いもの</b><small>「'+esc(base)+' 幅'+Math.round(+it.w)+'cm」で探します</small></span></button>'+
     (canBig?'<button data-m="max" class="'+(shopMode==='max'?'on':'')+'"><i></i><span><b>この場所に入る、いちばん大きいもの</b><small>「'+esc(base)+' 幅'+maxW+'cm」で探します</small></span></button>':'')+
-    '</div><div class="go2"><a href="'+u.rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a class="sub" href="'+u.az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a></div>'+
-    '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>'+readLink(it.name);
+    '</div>'+'<div class="sortseg"><span>並び順</span><button data-s="rec" class="'+(shopSort==='rec'?'on':'')+'">おすすめ</button><button data-s="cheap" class="'+(shopSort==='cheap'?'on':'')+'">安い順</button></div>'+'<div class="go2"><a href="'+u.rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a class="sub" href="'+u.az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a></div>'+
+    '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+''+(shopSort==='cheap'?'安い順は、部品や小物を外すため'+u.mn.toLocaleString()+'円以上で並べています。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>'+readLink(it.name);
 }
 function readLink(n){
   const R=[[/ベッド|マットレス|シングル|ダブル/,'/bed.html','同じセミダブルでも別物？ 無印・ニトリ・IKEAを実寸で比べた'],[/ソファ/,'/sofa.html','一人暮らしのソファ、何cmまでなら置ける？'],[/冷蔵庫/,'/reizouko.html','冷蔵庫の置き場、どこを測る？'],[/洗濯機/,'/sentakuki.html','洗濯機の置き場、どこを測る？']];
   const r=R.find(x=>x[0].test(n||''))||[0,'/hannyu.html','部屋に入っても、玄関を通らない？ 運び込みの測り方'];
   return '<a class="readlink" href="'+r[1]+'"><small>買う前に読む</small>'+r[2]+' →</a>';
 }
-$('#shopBody').addEventListener('click',e=>{const b=e.target.closest('.choice button');if(!b)return;shopMode=b.dataset.m;renderShop()});
+$('#shopBody').addEventListener('click',e=>{const z=e.target.closest('.sortseg button');if(z){shopSort=z.dataset.s;renderShop();return}const b=e.target.closest('.choice button');if(!b)return;shopMode=b.dataset.m;renderShop()});
 function shopLinks(kw,cond){
   const q=encodeURIComponent(kw);
   let rk='https://search.rakuten.co.jp/search/mall/'+q+'/';
