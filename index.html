@@ -193,6 +193,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   .grab{display:block;position:absolute;left:0;right:0;top:0;height:30px;touch-action:none;cursor:grab;z-index:1}
   .grab:after{content:"";position:absolute;left:50%;top:10px;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:#d8cfc0}
 }
+.readlink{display:block;margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--soft,#fffdf8);box-shadow:0 0 0 1px var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;line-height:1.6}.readlink small{display:block;font-weight:500;font-size:11px;letter-spacing:.14em;color:var(--sub)}
 </style>
 </head>
 <body>
@@ -706,7 +707,12 @@ function renderShop(){
     '<button data-m="now" class="'+(shopMode==='now'?'on':'')+'"><i></i><span><b>今の大きさに近いもの</b><small>「'+esc(base)+' 幅'+Math.round(+it.w)+'cm」で探します</small></span></button>'+
     (canBig?'<button data-m="max" class="'+(shopMode==='max'?'on':'')+'"><i></i><span><b>この場所に入る、いちばん大きいもの</b><small>「'+esc(base)+' 幅'+maxW+'cm」で探します</small></span></button>':'')+
     '</div><div class="go2"><a href="'+u.rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a class="sub" href="'+u.az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a></div>'+
-    '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>';
+    '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>'+readLink(it.name);
+}
+function readLink(n){
+  const R=[[/ベッド|マットレス|シングル|ダブル/,'/bed.html','同じセミダブルでも別物？ 無印・ニトリ・IKEAを実寸で比べた'],[/ソファ/,'/sofa.html','一人暮らしのソファ、何cmまでなら置ける？'],[/冷蔵庫/,'/reizouko.html','冷蔵庫の置き場、どこを測る？'],[/洗濯機/,'/sentakuki.html','洗濯機の置き場、どこを測る？']];
+  const r=R.find(x=>x[0].test(n||''))||[0,'/hannyu.html','部屋に入っても、玄関を通らない？ 運び込みの測り方'];
+  return '<a class="readlink" href="'+r[1]+'"><small>買う前に読む</small>'+r[2]+' →</a>';
 }
 $('#shopBody').addEventListener('click',e=>{const b=e.target.closest('.choice button');if(!b)return;shopMode=b.dataset.m;renderShop()});
 function shopLinks(kw,cond){
