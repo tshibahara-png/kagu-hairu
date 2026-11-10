@@ -73,11 +73,11 @@ footer a{color:var(--sub)}
 <article class="sheetpage">
   <div class="kicker noprint"><b>No.08</b>使える道具</div>
   <h1>内見チェックシート｜家具が入るか確かめる、採寸の書き込み用紙</h1>
-  <p class="lead noprint">内見のときに測っておくと、あとで家具選びに困らない場所をまとめた用紙です。印刷して、メジャーと一緒に持って行ってください。スマホで使うなら、道具の「採寸メモ」にも同じ項目があります。</p>
+  <p class="lead noprint">内見で測っておく場所をまとめた用紙です。測った数字を道具に入れると、家具が入るかどうか、入るのは何cmまでかがすぐ分かります。スマホを持って行くなら、道具の「採寸メモ」に直接入れるのがいちばん早いです。</p>
   <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 24px">
-    <button class="btn" onclick="window.print()">このシートを印刷する（A4）</button>
+    <a class="btn" href="/">スマホの採寸メモに入れる（おすすめ）</a>
+    <button class="btn sub" onclick="window.print()">紙に印刷する（A4）</button>
     <a class="btn sub" href="/naiken-checksheet.pdf" download>PDFでダウンロード</a>
-    <a class="btn sub" href="/">スマホの採寸メモを使う</a>
   </div>
 
   <div class="paper">
@@ -86,15 +86,19 @@ footer a{color:var(--sub)}
     <table class="ck"><tr><th>測るところ</th><th>長さ</th><th>メモ</th></tr><tr><td>部屋の横（壁から壁）</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>部屋の縦（壁から壁）</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>天井の高さ</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>部屋のドアの幅</td><td class="blank">　　　　cm</td><td class="nt">開き方：内／外／引き戸</td></tr><tr><td>窓の幅・床から窓までの高さ</td><td class="blank">　　　　cm</td><td class="nt">床まで／腰高</td></tr><tr><td>カーテンレールの幅・床までの高さ</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>エアコンの下から床まで</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>冷蔵庫の置き場（幅×奥行き）</td><td class="blank">　　　　cm</td><td class="nt">上の棚までの高さ</td></tr><tr><td>洗濯機の置き場（防水パン）</td><td class="blank">　　　　cm</td><td class="nt">蛇口までの高さ</td></tr><tr><td>玄関ドアの幅</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>廊下のいちばん狭い幅</td><td class="blank">　　　　cm</td><td class="nt"></td></tr><tr><td>曲がり角の幅</td><td class="blank">　　　　cm</td><td class="nt"></td></tr></table>
     <h3>2. 差込口（家具の置き場所が決まります）</h3>
     <table class="ck"><tr><th>差込口</th><th>どの壁</th><th>壁の端から</th><th>床から</th></tr><tr><td>テレビ端子</td><td class="blank">　　　　　</td><td class="blank">　　cm</td><td class="blank">　　cm</td></tr><tr><td>コンセント①</td><td class="blank">　　　　　</td><td class="blank">　　cm</td><td class="blank">　　cm</td></tr><tr><td>コンセント②</td><td class="blank">　　　　　</td><td class="blank">　　cm</td><td class="blank">　　cm</td></tr><tr><td>コンセント③</td><td class="blank">　　　　　</td><td class="blank">　　cm</td><td class="blank">　　cm</td></tr><tr><td>コンセント④</td><td class="blank">　　　　　</td><td class="blank">　　cm</td><td class="blank">　　cm</td></tr><tr><td>ネットの差込口</td><td class="blank">　　　　　</td><td class="blank">　　cm</td><td class="blank">　　cm</td></tr></table>
-    <h3>3. 間取りのメモ</h3>
-    <div class="grid"><span>部屋の形と、ドア・窓・差込口の位置を書き込む</span></div>
-    <h3>4. 見ておくこと</h3>
+    <div class="toapp">
+      <img src="img/qr-tool.svg" alt="道具へのQRコード">
+      <div><b>測ったら、この数字をスマホに入れるだけ。</b>
+      <span>置きたい家具が入るか、入るのは何cmまでか、コンセントに届くかが、その場で分かります。入る大きさのまま、楽天やアマゾンで探せます。（無料・登録なし）</span>
+      <em>kagu-hairu.netlify.app</em></div>
+    </div>
+    <h3>3. 見ておくこと</h3>
     <ul class="boxes">
       <li>□ 柱や出っぱりの位置と大きさ</li><li>□ 床まである窓の前に置けるか</li>
       <li>□ ベランダへの出入り口の前は空けられるか</li><li>□ 収納の扉を開ける空き</li>
       <li>□ 携帯の電波（部屋の奥でも入るか）</li><li>□ 日当たりと、窓からの視線</li>
     </ul>
-    <p class="pf">この家具、入る？　kagu-hairu.netlify.app　｜　測った数字を入れると、家具が入るかスマホで確かめられます</p>
+    <p class="pf">この家具、入る？　kagu-hairu.netlify.app</p>
   </div>
 
   <div class="noprint">
@@ -123,6 +127,8 @@ footer a{color:var(--sub)}
 .paper h3{font-size:13px;margin:14px 0 6px}
 .ck{width:100%;border-collapse:collapse;font-size:12px}.ck th,.ck td{border:1px solid #cfc7b9;padding:6px 6px;text-align:left}.ck th{background:#f4efe5;font-weight:700}
 .ck td.blank{min-width:70px}.ck td.nt{color:var(--sub);font-size:11px}
+
+.toapp{display:flex;gap:14px;align-items:center;margin:16px 0 4px;padding:14px;border-radius:12px;background:#fdf6dc;box-shadow:0 0 0 2px #f1c740}.toapp img{width:110px;height:110px;flex:none;background:#fff;padding:4px;border-radius:6px}.toapp b{display:block;font-size:15px;margin-bottom:4px}.toapp span{display:block;font-size:12px;line-height:1.7}.toapp em{display:block;font-style:normal;font-weight:700;margin-top:4px;font-size:12px}
 .grid{height:260px;border:1px solid #cfc7b9;background-image:linear-gradient(#ece6da 1px,transparent 1px),linear-gradient(90deg,#ece6da 1px,transparent 1px);background-size:13px 13px;position:relative}
 .grid span{position:absolute;left:8px;top:6px;font-size:10px;color:var(--sub);background:#fff;padding:0 4px}
 .boxes{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px}
@@ -134,7 +140,7 @@ footer a{color:var(--sub)}
   .paper{box-shadow:none;margin:0;padding:0;font-size:11px}
   .ck td,.ck th{padding:3px 6px;font-size:10.5px}
   .paper h3{margin:8px 0 4px}
-  .grid{height:165px}
+  .toapp img{width:95px;height:95px}
   main,article{margin:0!important;padding:0!important}
   .boxes{font-size:10px;gap:2px 12px}
   .pf{margin-top:6px}
