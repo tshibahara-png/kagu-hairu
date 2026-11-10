@@ -79,7 +79,7 @@ svg#plan{width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-
 .selbar .find svg{width:17px;height:17px;stroke:var(--ink)}
 .selbar .shopbtn{display:flex;align-items:center;height:44px;padding:0 10px;font-size:11.5px;letter-spacing:.04em;color:var(--ink);text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
 .selbar .shopbtn .prtag{border:none;padding:0;margin-left:3px;font-size:8.5px;color:var(--sub);letter-spacing:.08em;text-decoration:none}
-.selbar .edit{display:flex;gap:6px;align-items:center;width:100%;padding:6px 10px 4px 0}
+.selbar .edit{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;width:100%;padding:6px 10px 4px 0}.selbar .ef{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.selbar .ef.nm{flex-basis:100%}.selbar .ef small{font-size:10.5px;color:var(--sub);letter-spacing:.1em}.selbar .ef input{width:100%}.selbar .edit>span{padding-bottom:8px}
 .selbar .edit input{padding:6px 10px;font-size:14px}
 .selbar .edit span{font-size:12px;color:var(--sub)}
 
@@ -184,8 +184,8 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   .ghost{font-size:11px;letter-spacing:.08em}
   .selbar{padding-left:12px}
   .selbar .nm{font-size:15px;max-width:130px}
-  .selbar .ib span{display:none}
-  .selbar .ib{padding:0 9px}
+  .selbar .ib{flex-direction:column;gap:0;padding:0 6px;min-width:40px;font-size:10px}
+  .selbar .ib svg{width:20px;height:20px}
   .dock{margin-bottom:calc(10px + env(safe-area-inset-bottom))}
   .sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-height:84vh;max-height:84dvh;padding-top:30px;padding-bottom:calc(24px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;transform:translateY(30px);overscroll-behavior:contain}
   .sheet.on{transform:translateY(var(--dy,0px))}
@@ -195,6 +195,7 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 }
 .readlink{display:block;margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--soft,#fffdf8);box-shadow:0 0 0 1px var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;line-height:1.6}.readlink small{display:block;font-weight:500;font-size:11px;letter-spacing:.14em;color:var(--sub)}
 .sortseg{display:flex;align-items:center;gap:4px;margin-top:16px;font-size:12px}.sortseg span{color:var(--sub);letter-spacing:.12em;margin-right:6px}.sortseg button{border:0;background:transparent;font:inherit;font-size:13px;padding:7px 14px;border-radius:999px;color:var(--sub);box-shadow:0 0 0 1px var(--line)}.sortseg button.on{background:var(--ink);color:#fff;box-shadow:none;font-weight:700}
+.welcome{margin:10px 0 4px;padding:16px 18px;border-radius:18px;background:var(--card);box-shadow:0 0 0 1px var(--line),0 8px 20px rgba(74,54,38,.06)}.welcome b{font-family:'Shippori Mincho B1',serif;font-size:17px}.welcome ol{margin:8px 0 12px;padding-left:1.3em;font-size:13.5px;line-height:1.9}.welcome .wbtn{display:flex;gap:8px}.welcome .wbtn .btn{flex:1;margin:0;font-size:13px;padding:12px 8px}
 </style>
 </head>
 <body>
@@ -208,6 +209,11 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
   <div id="result" class="result"></div>
   <ul id="issues" class="issues" hidden></ul>
 
+  <div class="welcome" id="welcome" hidden>
+    <b>はじめての方へ</b>
+    <ol><li>部屋の広さを入れる（畳数を選ぶだけでもOK）</li><li>置きたい家具を選んで、ドラッグで動かす</li><li>ぶつかると赤く表示。入るサイズでそのまま探せます</li></ol>
+    <div class="wbtn"><button class="btn" id="wStart">部屋の広さを入れる</button><button class="btn sub" id="wTry">まず見本で触ってみる</button></div>
+  </div>
   <div class="stage">
     <svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg>
     <button class="zoomreset" id="zoomReset" hidden>元の大きさ</button>
@@ -219,9 +225,9 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
       <button id="bDel" class="ib" title="消す" aria-label="消す"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg><span>消す</span></button>
       <button id="bShop" class="find" aria-label="このサイズの商品を探す"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>商品を探す</button>
       <div class="edit" id="editRow" hidden>
-        <input id="sName" style="flex:2" aria-label="名前">
-        <input id="sW" type="number" inputmode="numeric" aria-label="幅"><span>×</span>
-        <input id="sD" type="number" inputmode="numeric" aria-label="奥行き"><span>cm</span>
+        <label class="ef nm"><small>名前</small><input id="sName" aria-label="名前"></label>
+        <label class="ef"><small>幅</small><input id="sW" type="number" inputmode="numeric" aria-label="幅"></label><span>×</span>
+        <label class="ef"><small>奥行き</small><input id="sD" type="number" inputmode="numeric" aria-label="奥行き"></label><span>cm</span>
       </div>
     </div>
   </div>
@@ -377,8 +383,9 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 <!-- 共有 -->
 <section class="sheet" id="sheet-share"><i class="grab" aria-hidden="true"></i>
   <h2>保存・共有<button class="close" data-close>×</button></h2>
-  <p class="lead">配置はこの端末に自動で保存されます。家族や不動産屋さんに渡すときは、共有コードを送ってください。</p>
-  <button class="btn" id="makeCode">共有コードをコピー</button>
+  <p class="lead">配置はこの端末に自動で保存されます。家族や友だちに見せたいときは、リンクを送るだけ。開いた人の画面に、同じ配置が出ます。</p>
+  <button class="btn" id="shareLink">リンクを送る（LINEなど）</button>
+  <button class="btn sub" id="makeCode" style="margin-top:8px">共有コードをコピー</button>
   <div class="sec">受け取ったコードを開く</div>
   <textarea id="code" rows="3" placeholder="ここに貼り付け"></textarea>
   <button class="btn sub" id="loadCode" style="margin-top:8px">開く</button>
@@ -402,8 +409,8 @@ const LV_COLOR=['#9a9285','#b8951f','#d98a2b','#d4502f'];
 const TATAMI=[['4.5畳',265,265],['6畳',265,355],['8畳',355,355],['10畳',355,440],['12畳',355,530]];
 const PRESETS=[
  ['ベッド',[['シングル',97,195],['セミダブル',120,195],['ダブル',140,195]]],
- ['ソファ・テーブル',[['2人掛けソファ',140,80],['3人掛けソファ',190,85],['ローテーブル',100,50],['こたつ',80,80],['食卓（2人）',75,75],['食卓（4人）',135,80]]],
- ['収納・机',[['テレビ台',150,40],['本棚',80,30],['チェスト',80,45],['デスク',100,60]]],
+ ['ソファ・テーブル',[['2人掛けソファ',140,80],['3人掛けソファ',190,85],['ソファベッド',180,90],['座椅子',55,70],['ローテーブル',100,50],['こたつ',80,80],['食卓（2人）',75,75],['食卓（4人）',135,80]]],
+ ['収納・机',[['テレビ台',150,40],['本棚',80,30],['チェスト',80,45],['デスク',100,60],['ハンガーラック',90,45],['レンジ台',60,45],['カラーボックス',42,30],['ドレッサー',80,40]]],
  ['家電',[['冷蔵庫',60,65],['洗濯機',60,60]]],
  ['ラグ・マット（家具と重ねてOK）',[['ラグ（小）',130,190,1],['ラグ（中）',185,185,1],['ラグ（大）',200,250,1],['キッチンマット',60,180,1],['玄関マット',50,80,1],['こたつ敷き',190,190,1]]]
 ];
@@ -848,8 +855,21 @@ function addItem(name,w,d,flat){
 $('#addCustom').addEventListener('click',()=>{const w=+$('#cW').value,d=+$('#cD').value;if(!(w>0&&d>0)){toast('幅と奥行きを数字で入れてください');return}addItem($('#cName').value.trim()||'家具',w,d,$('#cFlat').checked)});
 
 /* 共有 */
+function codeOf(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+$('#shareLink').addEventListener('click',async()=>{
+  const url=location.origin+location.pathname+'#s='+encodeURIComponent(codeOf());
+  const text='部屋に家具を置いてみた。この配置、どう思う？';
+  try{if(navigator.share){await navigator.share({title:'この家具、入る？',text,url});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(url);toast('リンクをコピーしました。LINEなどに貼って送れます')}catch(e){$('#code').value=url;toast('リンクを下の欄に出しました。コピーして送ってください')}
+});
+(function(){const h=location.hash;if(!h.startsWith('#s='))return;
+  try{const s=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(h.slice(3))))));if(!valid(s))throw 0;
+    const had=load();if(had&&!confirm('送られてきた配置を開きますか？\n今この端末にある配置は置き換わります。')){history.replaceState(null,'',location.pathname);return}
+    S=s;sel=null;history.replaceState(null,'',location.pathname);setTimeout(()=>{refresh();toast('送られてきた配置を開きました')},50);try{localStorage.setItem('kagu-welcomed','1')}catch(e){}
+  }catch(e){}
+})();
 $('#makeCode').addEventListener('click',async()=>{
-  const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));$('#code').value=code;
+  const code=codeOf();$('#code').value=code;
   try{await navigator.clipboard.writeText(code);toast('コピーしました。メールやLINEで送れます')}catch(e){const t=$('#code');t.focus();t.select();toast('コードを選びました。コピーして送ってください')}
 });
 $('#loadCode').addEventListener('click',()=>{
@@ -942,6 +962,12 @@ window.addEventListener('keydown',e=>{
   e.preventDefault();it.x+=dx;it.y+=dy;clampIn(it);refresh();
 });
 refresh();renderTape();window.addEventListener('resize',renderTape);
+(function(){let seen=false;try{seen=!!localStorage.getItem('kagu-welcomed')}catch(e){}
+  const w=$('#welcome');if(seen)return;w.hidden=false;
+  const done=()=>{w.hidden=true;try{localStorage.setItem('kagu-welcomed','1')}catch(e){}};
+  $('#wStart').addEventListener('click',()=>{done();openSheet('room')});
+  $('#wTry').addEventListener('click',()=>{done();toast('見本の部屋です。家具をドラッグしてみてください')});
+})();
 })();
 </script>
 </body>
