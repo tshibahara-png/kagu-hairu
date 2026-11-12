@@ -744,7 +744,7 @@ function renderShop(){
     '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+''+(shopSort==='cheap'?'安い順は、部品や小物を外すため'+u.mn.toLocaleString()+'円以上で並べています。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>'+readLink(it.name);
 }
 function readLink(n){
-  const R=[[/ベッド|マットレス|シングル|ダブル/,'/bed.html','同じセミダブルでも別物？ 無印・ニトリ・IKEAを実寸で比べた'],[/ソファ/,'/sofa.html','一人暮らしのソファ、何cmまでなら置ける？'],[/テレビ台|デスク|机|ドレッサー|レンジ/,'/konsento.html','家具の置き場所は「コンセントとテレビ端子」で決まる'],[/冷蔵庫/,'/reizouko.html','冷蔵庫の置き場、どこを測る？'],[/洗濯機/,'/sentakuki.html','洗濯機の置き場、どこを測る？']];
+  const R=[[/ベッド|マットレス|シングル|ダブル/,'/bed.html','同じセミダブルでも別物？ 無印・ニトリ・IKEAを実寸で比べた'],[/ソファ/,'/sofa.html','一人暮らしのソファ、何cmまでなら置ける？'],[/デスク|机/,'/desk.html','一人暮らしのデスク、椅子を引く空きまで測る'],[/テレビ台|ドレッサー|レンジ/,'/konsento.html','家具の置き場所は「コンセントとテレビ端子」で決まる'],[/冷蔵庫/,'/reizouko.html','冷蔵庫の置き場、どこを測る？'],[/洗濯機/,'/sentakuki.html','洗濯機の置き場、どこを測る？']];
   const r=R.find(x=>x[0].test(n||''))||[0,'/hannyu.html','部屋に入っても、玄関を通らない？ 運び込みの測り方'];
   return '<a class="readlink" href="'+r[1]+'"><small>買う前に読む</small>'+r[2]+' →</a>';
 }
