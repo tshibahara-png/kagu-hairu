@@ -406,7 +406,8 @@ details ol{padding-left:18px;margin:8px 0 2px;font-size:13px;line-height:1.8}
 (function(){
 const KEY='kagu-haichi-v1';
 /* 紹介用の番号（アフィリエイトID）。空のときは普通の検索リンクになります */
-const AFF={rakuten:'59442172.3a89ccba.59442173.33295b20',amazon:''};
+const AFF={rakuten:'59442172.3a89ccba.59442173.33295b20',amazon:'',yahoo:'5921352'};
+function yahooUrl(kw){const u='https://shopping.yahoo.co.jp/search?p='+encodeURIComponent(kw);return AFF.yahoo?'https://af.moshimo.com/af/c/click?a_id='+AFF.yahoo+'&p_id=1225&pc_id=1925&pl_id=18502&url='+encodeURIComponent(u):u}
 const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const fmt=n=>Math.round(n*10)/10;
@@ -719,7 +720,7 @@ let shopMode='now';
 let shopSort='rec';
 const FLOOR=[[/ベッド|マットレス/,8000],[/ソファ/,8000],[/冷蔵庫|洗濯機/,15000],[/テレビ台|デスク|机|テーブル|ダイニング/,3000]];
 function floorOf(kw){const f=FLOOR.find(x=>x[0].test(kw));return f?f[1]:2000}
-function shopUrls(kw,sort){const q=encodeURIComponent(kw),cheap=sort==='cheap',mn=floorOf(kw);let rk='https://search.rakuten.co.jp/search/mall/'+q+'/'+(cheap?'?s=2&min='+mn:'');if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return {rk,az:'https://www.amazon.co.jp/s?k='+q+(cheap?'&s=price-asc-rank&rh=p_36%3A'+(mn*100)+'-':'')+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):''),mn}}
+function shopUrls(kw,sort){const q=encodeURIComponent(kw),cheap=sort==='cheap',mn=floorOf(kw);let rk='https://search.rakuten.co.jp/search/mall/'+q+'/'+(cheap?'?s=2&min='+mn:'');if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);return {rk,az:'https://www.amazon.co.jp/s?k='+q+(cheap?'&s=price-asc-rank&rh=p_36%3A'+(mn*100)+'-':'')+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):''),yh:yahooUrl(kw),mn}}
 function renderShop(){
   const it=curItem(),box=$('#shopBody');if(!it){box.innerHTML='<p class="small">家具を選んでから開いてください。</p>';return}
   const r=rectOf(it),b=bounds(it),rot=it.rot%180!==0;
@@ -740,7 +741,7 @@ function renderShop(){
     '<div class="sec">どの大きさで探す？</div><div class="choice">'+
     '<button data-m="now" class="'+(shopMode==='now'?'on':'')+'"><i></i><span><b>今の大きさに近いもの</b><small>「'+esc(base)+' 幅'+Math.round(+it.w)+'cm」で探します</small></span></button>'+
     (canBig?'<button data-m="max" class="'+(shopMode==='max'?'on':'')+'"><i></i><span><b>この場所に入る、いちばん大きいもの</b><small>「'+esc(base)+' 幅'+maxW+'cm」で探します</small></span></button>':'')+
-    '</div>'+'<div class="sortseg"><span>並び順</span><button data-s="rec" class="'+(shopSort==='rec'?'on':'')+'">おすすめ</button><button data-s="cheap" class="'+(shopSort==='cheap'?'on':'')+'">安い順</button></div>'+'<div class="go2"><a href="'+u.rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a class="sub" href="'+u.az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a></div>'+
+    '</div>'+'<div class="sortseg"><span>並び順</span><button data-s="rec" class="'+(shopSort==='rec'?'on':'')+'">おすすめ</button><button data-s="cheap" class="'+(shopSort==='cheap'?'on':'')+'">安い順</button></div>'+'<div class="go2"><a href="'+u.rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a class="sub" href="'+u.yh+'" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">ヤフーショッピングで探す'+(AFF.yahoo?tag:'')+'</a><a class="sub" href="'+u.az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a></div>'+
     '<p class="small" style="margin-top:12px">'+((!bad&&!open)?'選ぶときは、幅<b>'+maxW+'cm</b>'+(dOpen?'':'・奥行き<b>'+maxD+'cm</b>')+'までのものを。':'')+''+(shopSort==='cheap'?'安い順は、部品や小物を外すため'+u.mn.toLocaleString()+'円以上で並べています。':'')+'検索の結果には大きさの合わない商品も混ざるので、買う前に商品ページの寸法を確認してください。</p>'+readLink(it.name);
 }
 function readLink(n){
@@ -755,7 +756,7 @@ function shopLinks(kw,cond){
   if(AFF.rakuten)rk='https://hb.afl.rakuten.co.jp/ichiba/'+AFF.rakuten+'/?pc='+encodeURIComponent(rk);
   let az='https://www.amazon.co.jp/s?k='+q+(AFF.amazon?'&tag='+encodeURIComponent(AFF.amazon):'');
   const tag=(AFF.rakuten||AFF.amazon)?'<span class="prtag">PR</span>':'';
-  return '<div class="shops"><span class="pr" style="color:var(--ink);font-size:13px;font-weight:700;letter-spacing:.06em">このサイズの商品を探す</span>'+(cond?'<span class="pr" style="color:var(--sub);font-size:12px;margin-top:-4px">選ぶときは '+cond+' のものを（「'+esc(kw)+'」で探します）</span>':'')+'<a href="'+rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a href="'+az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a>'+
+  return '<div class="shops"><span class="pr" style="color:var(--ink);font-size:13px;font-weight:700;letter-spacing:.06em">このサイズの商品を探す</span>'+(cond?'<span class="pr" style="color:var(--sub);font-size:12px;margin-top:-4px">選ぶときは '+cond+' のものを（「'+esc(kw)+'」で探します）</span>':'')+'<a href="'+rk+'" target="_blank" rel="noopener sponsored">楽天で探す'+(AFF.rakuten?tag:'')+'</a><a href="'+yahooUrl(kw)+'" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">ヤフーで探す'+(AFF.yahoo?'<span class="prtag">PR</span>':'')+'</a><a href="'+az+'" target="_blank" rel="noopener sponsored">アマゾンで探す'+(AFF.amazon?tag:'')+'</a>'+
     '<span class="pr">検索の結果には大きさの合わない商品も混ざります。買う前に商品ページの寸法を確認してください。</span></div>';
 }
 function renderFit(){

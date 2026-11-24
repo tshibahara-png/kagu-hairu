@@ -124,7 +124,9 @@ footer a{color:var(--sub)}
   <div class="cta">
     <p>幅と奥行きが決まったら、そのサイズで探せます。</p>
     <a class="btn rk" id="rkD1" href="#" target="_blank" rel="noopener sponsored">コンパクトなデスクを楽天で見る<span class="pr">PR</span></a>
+    <a class="btn rk" id="yhD1" href="#" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">コンパクトなデスクをヤフーで見る<span class="pr">PR</span></a>
     <a class="btn rk" id="rkD2" href="#" target="_blank" rel="noopener sponsored">幅100cmのデスクを楽天で見る<span class="pr">PR</span></a>
+    <a class="btn rk" id="yhD2" href="#" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">幅100cmのデスクをヤフーで見る<span class="pr">PR</span></a>
     <p class="note" style="margin:10px 0 0">商品の外寸は、ページで必ず確かめてください。</p>
   </div>
 
@@ -149,7 +151,7 @@ footer a{color:var(--sub)}
 </article>
 
 <footer>
-  <p>このページには広告（PR）のリンクが含まれます。リンクから商品が買われると、運営者に紹介料が入ることがあります。</p>
+  <p>このページには広告（PR）のリンクが含まれます（楽天アフィリエイト、もしもアフィリエイトなど）。リンクから商品が買われると、運営者に紹介料が入ることがあります。</p>
   <p><a href="/guide/">測り方ガイドの一覧</a>｜<a href="/about.html">運営者・広告について</a>｜<a href="/about.html#privacy">プライバシーポリシー</a>｜<a href="/for-agents.html">不動産会社の方へ</a>｜<a href="/">この家具、入る？</a></p>
 </footer>
 
@@ -157,8 +159,11 @@ footer a{color:var(--sub)}
 (function(){
   var AFF='59442172.3a89ccba.59442173.33295b20';
   function rk(kw){var u='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(kw)+'/';return 'https://hb.afl.rakuten.co.jp/ichiba/'+AFF+'/?pc='+encodeURIComponent(u)}
+  function yh(kw){return 'https://af.moshimo.com/af/c/click?a_id=5921352&p_id=1225&pc_id=1925&pl_id=18502&url='+encodeURIComponent('https://shopping.yahoo.co.jp/search?p='+encodeURIComponent(kw))}
   var e=document.getElementById('rkD1');if(e)e.href=rk('デスク コンパクト 幅80 奥行45');
   var e=document.getElementById('rkD2');if(e)e.href=rk('デスク 幅100 奥行60 パソコンデスク');
+  var e=document.getElementById('yhD1');if(e)e.href=yh('デスク コンパクト 幅80 奥行45');
+  var e=document.getElementById('yhD2');if(e)e.href=yh('デスク 幅100 奥行60 パソコンデスク');
 })();
 </script>
 </body>

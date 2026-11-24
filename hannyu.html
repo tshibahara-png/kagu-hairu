@@ -130,7 +130,9 @@ footer a{color:var(--sub)}
   <div class="cta">
     <p>通り道が狭いときの選び方</p>
     <a class="btn rk" id="rkSofa" href="#" target="_blank" rel="noopener sponsored">分割できるソファを楽天で見る<span class="pr">PR</span></a>
+    <a class="btn rk" id="yhSofa" href="#" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">分割できるソファをヤフーで見る<span class="pr">PR</span></a>
     <a class="btn rk" id="rkBed" href="#" target="_blank" rel="noopener sponsored">組み立て式のベッドを楽天で見る<span class="pr">PR</span></a>
+    <a class="btn rk" id="yhBed" href="#" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">組み立て式のベッドをヤフーで見る<span class="pr">PR</span></a>
     <p class="note" style="margin-top:10px">検索の結果には条件に合わない商品も混ざります。買う前に商品ページの寸法と梱包サイズを確認してください。</p>
   </div>
 
@@ -155,7 +157,7 @@ footer a{color:var(--sub)}
 </article>
 
 <footer>
-  <p>このページには広告（PR）のリンクが含まれます。リンクから商品が買われると、運営者に紹介料が入ることがあります。</p>
+  <p>このページには広告（PR）のリンクが含まれます（楽天アフィリエイト、もしもアフィリエイトなど）。リンクから商品が買われると、運営者に紹介料が入ることがあります。</p>
   <p><a href="/guide/">測り方ガイドの一覧</a>｜<a href="/about.html">運営者・広告について</a>｜<a href="/about.html#privacy">プライバシーポリシー</a>｜<a href="/for-agents.html">不動産会社の方へ</a>｜<a href="/">この家具、入る？</a></p>
 </footer>
 
@@ -163,8 +165,11 @@ footer a{color:var(--sub)}
 (function(){
   var AFF='59442172.3a89ccba.59442173.33295b20';
   function rk(kw){var u='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(kw)+'/';return 'https://hb.afl.rakuten.co.jp/ichiba/'+AFF+'/?pc='+encodeURIComponent(u)}
+  function yh(kw){return 'https://af.moshimo.com/af/c/click?a_id=5921352&p_id=1225&pc_id=1925&pl_id=18502&url='+encodeURIComponent('https://shopping.yahoo.co.jp/search?p='+encodeURIComponent(kw))}
   document.getElementById('rkSofa').href=rk('分割 ソファ');
   document.getElementById('rkBed').href=rk('組み立て式 ベッド');
+  var e=document.getElementById('yhSofa');if(e)e.href=yh('分割 ソファ');
+  var e=document.getElementById('yhBed');if(e)e.href=yh('組み立て式 ベッド');
 })();
 </script>
 </body>

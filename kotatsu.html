@@ -141,7 +141,9 @@ footer a{color:var(--sub)}
   <div class="cta">
     <p>部屋に合う大きさが決まったら、そのサイズで探せます。</p>
     <a class="btn rk" id="rkK1" href="#" target="_blank" rel="noopener sponsored">75cm角のこたつを楽天で見る<span class="pr">PR</span></a>
+    <a class="btn rk" id="yhK1" href="#" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">75cm角のこたつをヤフーで見る<span class="pr">PR</span></a>
     <a class="btn rk" id="rkK2" href="#" target="_blank" rel="noopener sponsored">省スペースのこたつ布団を楽天で見る<span class="pr">PR</span></a>
+    <a class="btn rk" id="yhK2" href="#" target="_blank" rel="nofollow noopener sponsored" referrerpolicy="no-referrer-when-downgrade">省スペースのこたつ布団をヤフーで見る<span class="pr">PR</span></a>
     <p class="note" style="margin:10px 0 0">天板と布団の大きさは、商品ページで必ず確かめてください。</p>
   </div>
 
@@ -162,7 +164,7 @@ footer a{color:var(--sub)}
 </article>
 
 <footer>
-  <p>このページには広告（PR）のリンクが含まれます。リンクから商品が買われると、運営者に紹介料が入ることがあります。</p>
+  <p>このページには広告（PR）のリンクが含まれます（楽天アフィリエイト、もしもアフィリエイトなど）。リンクから商品が買われると、運営者に紹介料が入ることがあります。</p>
   <p><a href="/guide/">測り方ガイドの一覧</a>｜<a href="/about.html">運営者・広告について</a>｜<a href="/about.html#privacy">プライバシーポリシー</a>｜<a href="/for-agents.html">不動産会社の方へ</a>｜<a href="/">この家具、入る？</a></p>
 </footer>
 
@@ -170,8 +172,11 @@ footer a{color:var(--sub)}
 (function(){
   var AFF='59442172.3a89ccba.59442173.33295b20';
   function rk(kw){var u='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(kw)+'/';return 'https://hb.afl.rakuten.co.jp/ichiba/'+AFF+'/?pc='+encodeURIComponent(u)}
+  function yh(kw){return 'https://af.moshimo.com/af/c/click?a_id=5921352&p_id=1225&pc_id=1925&pl_id=18502&url='+encodeURIComponent('https://shopping.yahoo.co.jp/search?p='+encodeURIComponent(kw))}
   var e=document.getElementById('rkK1');if(e)e.href=rk('こたつ 正方形 75');
   var e=document.getElementById('rkK2');if(e)e.href=rk('こたつ布団 省スペース 正方形');
+  var e=document.getElementById('yhK1');if(e)e.href=yh('こたつ 正方形 75');
+  var e=document.getElementById('yhK2');if(e)e.href=yh('こたつ布団 省スペース 正方形');
 })();
 </script>
 </body>
